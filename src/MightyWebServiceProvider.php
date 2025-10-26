@@ -130,6 +130,9 @@ class MightyWebServiceProvider extends ServiceProvider
      */
     protected function registerLivewireComponents(): void
     {
+        // Register the unified Dashboard component (class-based, not Volt)
+        Livewire::component('mightyweb.dashboard', \MightyWeb\Http\Livewire\Dashboard::class);
+        
         // Volt components are auto-discovered from:
         // - resources/views/livewire/floating-button/index.blade.php
         // - resources/views/livewire/tab/index.blade.php
@@ -142,8 +145,5 @@ class MightyWebServiceProvider extends ServiceProvider
         
         // All CRUD operations are now modal-based within single Volt components.
         // No separate create/edit components needed.
-        
-        // If you need to add non-Volt Livewire components, register them here:
-        // Livewire::component('mightyweb.custom-component', CustomComponent::class);
     }
 }

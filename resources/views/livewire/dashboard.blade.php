@@ -1,16 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-
-new class extends Component {
-    public string $activeTab = 'app-config';
-
-    public function switchTab(string $tab): void
-    {
-        $this->activeTab = $tab;
-    }
-}; ?>
-
 <div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
     {{-- Header --}}
     <div class="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40">

@@ -526,10 +526,23 @@ composer dump-autoload
 composer show livewire/livewire
 ```
 
-4. If still not working, try publishing the views:
+4. Ensure the MightyWeb service provider is loaded (check `composer.json`):
+```json
+"extra": {
+    "laravel": {
+        "providers": [
+            "MightyWeb\\MightyWebServiceProvider"
+        ]
+    }
+}
+```
+
+5. If still not working, try publishing the views:
 ```bash
 php artisan vendor:publish --tag=mightyweb-views
 ```
+
+**Note:** The dashboard component is registered as a standard Livewire component (`MightyWeb\Http\Livewire\Dashboard`), not a Volt component, so it works seamlessly in any Laravel application.
 
 ### Assets Not Loading
 
