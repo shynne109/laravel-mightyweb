@@ -89,6 +89,30 @@ php artisan migrate
 php artisan vendor:publish --tag=mightyweb-assets
 ```
 
+**Optional:** Publish configuration file for advanced customization:
+
+```bash
+php artisan vendor:publish --tag=mightyweb-config
+```
+
+**Optional:** Publish views for complete customization:
+
+```bash
+php artisan vendor:publish --tag=mightyweb-views
+```
+
+**Optional:** Publish migrations to customize database schema:
+
+```bash
+php artisan vendor:publish --tag=mightyweb-migrations
+```
+
+**Publish everything at once:**
+
+```bash
+php artisan vendor:publish --provider="MightyWeb\MightyWebServiceProvider"
+```
+
 ### Step 4: Add to Your Layout
 
 Add these directives to your main layout file:
