@@ -3,7 +3,9 @@
 namespace MightyWeb;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
+use Livewire\Volt\Volt;
 
 /**
  * MightyWeb Service Provider
@@ -53,6 +55,13 @@ class MightyWebServiceProvider extends ServiceProvider
 
         // Load package migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        
+        // Register Volt components path for auto-discovery
+        if (class_exists(\Livewire\Volt\Volt::class)) {
+            \Livewire\Volt\Volt::mount([
+                __DIR__.'/../resources/views/livewire'
+            ]);
+        }
 
         // Publish configuration file
         $this->publishes([
@@ -92,21 +101,21 @@ class MightyWebServiceProvider extends ServiceProvider
     protected function registerBladeDirectives(): void
     {
         // Directive for injecting CSS and header assets (includes Flux appearance)
-        \Blade::directive('mightywebAssets', function () {
+        Blade::directive('mightywebAssets', function () {
             return "<?php echo view('mightyweb::layouts.assets')->render(); ?>";
         });
 
         // Directive for injecting JavaScript and footer scripts (includes Flux scripts)
-        \Blade::directive('mightywebScripts', function () {
+        Blade::directive('mightywebScripts', function () {
             return "<?php echo view('mightyweb::layouts.scripts')->render(); ?>";
         });
         
         // Register Flux directives as aliases for convenience
-        \Blade::directive('fluxAppearance', function () {
+        Blade::directive('fluxAppearance', function () {
             return "<?php echo \Livewire\Flux\Flux::appearance(); ?>";
         });
         
-        \Blade::directive('fluxScripts', function () {
+        Blade::directive('fluxScripts', function () {
             return "<?php echo \Livewire\Flux\Flux::scripts(); ?>";
         });
     }

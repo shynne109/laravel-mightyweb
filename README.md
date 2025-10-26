@@ -500,7 +500,86 @@ export default {
 
 ---
 
-## 📚 Documentation
+## � Troubleshooting
+
+### Dashboard Component Not Found
+
+If you get the error: `Unable to find component: [mightyweb.dashboard]`
+
+**Solution:**
+
+1. Clear your application caches:
+```bash
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan livewire:discover
+```
+
+2. Make sure the package service provider is registered (auto-discovery should handle this in Laravel 11+):
+```bash
+composer dump-autoload
+```
+
+3. Verify Livewire 3.5+ is installed:
+```bash
+composer show livewire/livewire
+```
+
+4. If still not working, try publishing the views:
+```bash
+php artisan vendor:publish --tag=mightyweb-views
+```
+
+### Assets Not Loading
+
+If styles or scripts don't appear:
+
+1. Ensure you've published the assets:
+```bash
+php artisan vendor:publish --tag=mightyweb-assets --force
+```
+
+2. Check that directives are in your layout:
+```blade
+{{-- In <head> --}}
+@mightywebAssets
+
+{{-- Before </body> --}}
+@mightywebScripts
+```
+
+3. Clear browser cache and hard refresh (Ctrl+Shift+R)
+
+### Dark Mode Not Working
+
+Make sure Flux appearance is loaded in your layout:
+```blade
+<head>
+    @mightywebAssets {{-- This includes @fluxAppearance --}}
+</head>
+```
+
+### Image Upload Issues
+
+1. Ensure storage is linked:
+```bash
+php artisan storage:link
+```
+
+2. Check directory permissions:
+```bash
+chmod -R 775 storage/app/public
+```
+
+3. Verify `intervention/image` is installed:
+```bash
+composer show intervention/image
+```
+
+---
+
+## �📚 Documentation
 
 Additional documentation files:
 
