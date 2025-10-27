@@ -86,6 +86,7 @@ new class extends Component {
         $maxOrder = Page::max('sort_order');
         $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
         $this->showCreateModal = true;
+        $this->dispatch('open-modal', name: 'showCreateModal');
     }
 
     public function openEditModal(int $id): void
@@ -102,6 +103,7 @@ new class extends Component {
         $this->is_active = $page->is_active;
         
         $this->showEditModal = true;
+        $this->dispatch('open-modal', name: 'showEditModal');
     }
 
     public function save(): void
@@ -126,6 +128,7 @@ new class extends Component {
 
         session()->flash('success', 'Page created successfully!');
         $this->showCreateModal = false;
+        $this->dispatch('close-modal', name: 'showCreateModal');
         $this->resetForm();
     }
 
@@ -155,6 +158,7 @@ new class extends Component {
 
         session()->flash('success', 'Page updated successfully!');
         $this->showEditModal = false;
+        $this->dispatch('close-modal', name: 'showEditModal');
         $this->resetForm();
     }
 
@@ -162,6 +166,7 @@ new class extends Component {
     {
         $this->confirmingDelete = true;
         $this->deleteId = $id;
+        $this->dispatch('open-modal', name: 'confirmingDelete');
     }
 
     public function delete(): void
@@ -181,6 +186,7 @@ new class extends Component {
         }
 
         $this->confirmingDelete = false;
+        $this->dispatch('close-modal', name: 'confirmingDelete');
         $this->deleteId = null;
     }
 
@@ -245,36 +251,26 @@ new class extends Component {
             <h2 size="xl">Pages</h2>
             <p size="sm" class="text-gray-600 dark:text-gray-400">Manage app pages and content</p>
         </div>
-        <x-button variant="primary" wire:click="openCreateModal">
-            <x-slot:iconLeft>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </x-slot:iconLeft>
+        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
             Add New Page
-        </x-button>
+        </flux:button>
     </div>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <div class="relative">
-                <input type="text" 
-                       wire:model.debounce.300ms="search" 
-                       placeholder="Search by title, description, or URL..." 
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
+            <flux:input 
+                wire:model.debounce.300ms="search" 
+                icon="magnifying-glass"
+                placeholder="Search by title, description, or URL..." />
         </div>
         <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-600 dark:text-gray-400">Per page:</label>
-            <select wire:model="perPage" 
-                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-            </select>
+            <flux:select wire:model="perPage" variant="listbox">
+                <flux:option value="5">5 per page</flux:option>
+                <flux:option value="10">10 per page</flux:option>
+                <flux:option value="25">25 per page</flux:option>
+                <flux:option value="50">50 per page</flux:option>
+            </flux:select>
         </div>
     </div>
 
@@ -383,44 +379,30 @@ new class extends Component {
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <button wire:click="toggleActive({{ $page->id }})" 
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition {{ $page->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                <flux:badge 
+                                    wire:click="toggleActive({{ $page->id }})" 
+                                    size="sm" 
+                                    :color="$page->is_active ? 'green' : 'gray'"
+                                    class="cursor-pointer">
                                     {{ $page->is_active ? 'Active' : 'Inactive' }}
-                                </button>
+                                </flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <button wire:click="openEditModal({{ $page->id }})" 
-                                            class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button wire:click="confirmDelete({{ $page->id }})" 
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <flux:button icon="pencil" size="sm" variant="ghost" wire:click="openEditModal({{ $page->id }})" />
+                                    <flux:button icon="trash" size="sm" variant="ghost" color="red" wire:click="confirmDelete({{ $page->id }})" />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No pages found</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first page.</p>
-                                <div class="mt-6">
-                                    <x-button variant="primary" wire:click="openCreateModal">
-                                        <x-slot:iconLeft>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </x-slot:iconLeft>
-                                        Add New Page
-                                    </x-button>
-                                </div>
+                                <flux:icon.document class="w-16 h-16 mx-auto text-zinc-400 mb-4" />
+                                <flux:heading size="lg" class="mb-2">No pages found</flux:heading>
+                                <flux:text class="mb-6">Get started by creating your first page.</flux:text>
+                                <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
+                                    Add New Page
+                                </flux:button>
                             </td>
                         </tr>
                     @endforelse
@@ -437,140 +419,143 @@ new class extends Component {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <x-confirmation-modal wire:model="confirmingDelete">
-        <x-slot:title>Delete Page</x-slot:title>
-        <x-slot:content>
-            Are you sure you want to delete this page? This action cannot be undone.
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="danger" wire:click="delete" wire:loading.attr="disabled">Delete</x-button>
-        </x-slot:footer>
-    </x-confirmation-modal>
+    <flux:modal name="confirmingDelete" class="md:w-96">
+        <form wire:submit="delete" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Delete Page</flux:heading>
+                <flux:subheading>
+                    <p class="mt-2">Are you sure you want to delete this page? This action cannot be undone.</p>
+                </flux:subheading>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="danger" type="submit">Delete</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Create Page Modal -->
-    <x-modal wire:model="showCreateModal" max-width="2xl">
-        <x-slot:title>Create Page</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="save" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Page Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter page title" />
+    <flux:modal name="showCreateModal" class="md:w-[600px]">
+        <form wire:submit="save" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Create Page</flux:heading>
+            </div>
 
-                <x-form.textarea 
-                    wire:model.defer="description" 
-                    label="Description (Optional)" 
-                    name="description" 
-                    rows="3"
-                    placeholder="Enter page description" />
+            <flux:input 
+                wire:model.defer="title" 
+                label="Page Title" 
+                name="title" 
+                placeholder="Enter page title" />
 
-                <x-form.input 
-                    wire:model.defer="url" 
-                    label="URL" 
-                    name="url" 
-                    required 
-                    placeholder="https://example.com or /page" 
-                    help="The destination URL for this page" />
+            <x-form.textarea 
+                wire:model.defer="description" 
+                label="Description (Optional)" 
+                name="description" 
+                rows="3"
+                placeholder="Enter page description" />
 
-                <x-form.file-upload 
-                    wire:model="icon" 
-                    label="Page Icon (Optional)" 
-                    name="icon" 
-                    accept="image/*" 
-                    help="Upload an icon for the page (max 2MB)" />
+            <flux:input 
+                wire:model.defer="url" 
+                label="URL" 
+                name="url" 
+                placeholder="https://example.com or /page" 
+                description="The destination URL for this page" />
 
-                <div class="grid grid-cols-2 gap-4">
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
+            <x-form.file-upload 
+                wire:model="icon" 
+                label="Page Icon (Optional)" 
+                name="icon" 
+                accept="image/*" 
+                help="Upload an icon for the page (max 2MB)" />
 
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input 
+                    wire:model.defer="sort_order" 
+                    label="Sort Order" 
+                    name="sort_order" 
+                    type="number" 
+                    min="0" />
+
+                <div class="flex items-center pt-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               wire:model.defer="is_active" 
+                               class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                    </label>
                 </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="save" :loading="true">Create Page</x-button>
-        </x-slot:footer>
-    </x-modal>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="primary" type="submit">Create Page</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Edit Page Modal -->
-    <x-modal wire:model="showEditModal" max-width="2xl">
-        <x-slot:title>Edit Page</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="update" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Page Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter page title" />
+    <flux:modal name="showEditModal" class="md:w-[600px]">
+        <form wire:submit="update" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Edit Page</flux:heading>
+            </div>
 
-                <x-form.textarea 
-                    wire:model.defer="description" 
-                    label="Description (Optional)" 
-                    name="description" 
-                    rows="3"
-                    placeholder="Enter page description" />
+            <flux:input 
+                wire:model.defer="title" 
+                label="Page Title" 
+                name="title" 
+                placeholder="Enter page title" />
 
-                <x-form.input 
-                    wire:model.defer="url" 
-                    label="URL" 
-                    name="url" 
-                    required 
-                    placeholder="https://example.com or /page" 
-                    help="The destination URL for this page" />
+            <x-form.textarea 
+                wire:model.defer="description" 
+                label="Description (Optional)" 
+                name="description" 
+                rows="3"
+                placeholder="Enter page description" />
 
-                <x-form.file-upload 
-                    wire:model="icon" 
-                    label="Page Icon (Optional)" 
-                    name="icon" 
-                    :current-file="$existing_icon" 
-                    accept="image/*" 
-                    help="Upload a new icon to replace the current one (max 2MB)"
-                    wire:remove="removeExistingIcon" />
+            <flux:input 
+                wire:model.defer="url" 
+                label="URL" 
+                name="url" 
+                placeholder="https://example.com or /page" 
+                description="The destination URL for this page" />
 
-                <div class="grid grid-cols-2 gap-4">
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
+            <x-form.file-upload 
+                wire:model="icon" 
+                label="Page Icon (Optional)" 
+                name="icon" 
+                :current-file="$existing_icon" 
+                accept="image/*" 
+                help="Upload a new icon to replace the current one (max 2MB)"
+                wire:remove="removeExistingIcon" />
 
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input 
+                    wire:model.defer="sort_order" 
+                    label="Sort Order" 
+                    name="sort_order" 
+                    type="number" 
+                    min="0" />
+
+                <div class="flex items-center pt-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               wire:model.defer="is_active" 
+                               class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                    </label>
                 </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="update" :loading="true">Update Page</x-button>
-        </x-slot:footer>
-    </x-modal>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="primary" type="submit">Update Page</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Loading Overlay -->
     <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">

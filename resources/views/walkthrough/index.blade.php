@@ -235,54 +235,37 @@ new class extends Component {
     <!-- Header -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 size="xl">Walkthrough Screens</h2>
-            <p size="sm" class="text-gray-600 dark:text-gray-400">Manage onboarding screens for new users</p>
+            <flux:heading size="xl">Walkthrough Screens</flux:heading>
+            <flux:subheading>Manage onboarding screens for new users</flux:subheading>
         </div>
-        <x-button variant="primary" wire:click="openCreateModal">
-            <x-slot:iconLeft>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </x-slot:iconLeft>
+        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
             Add New Screen
-        </x-button>
+        </flux:button>
     </div>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <div class="relative">
-                <input type="text" 
-                       wire:model.debounce.300ms="search" 
+            <flux:input wire:model.live.debounce.300ms="search" 
                        placeholder="Search by title or description..." 
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
+                       icon="magnifying-glass" />
         </div>
         <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-600 dark:text-gray-400">Per page:</label>
-            <select wire:model="perPage" 
-                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-            </select>
+            <flux:select wire:model.live="perPage" placeholder="Per page">
+                <flux:option value="5">5</flux:option>
+                <flux:option value="10">10</flux:option>
+                <flux:option value="25">25</flux:option>
+                <flux:option value="50">50</flux:option>
+            </flux:select>
         </div>
     </div>
 
     <!-- Success Messages -->
     @if (session()->has('success'))
-        <div x-data="{ show: true }" 
-             x-show="show" 
-             x-init="setTimeout(() => show = false, 3000)"
-             class="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="text-green-800 dark:text-green-200">{{ session('success') }}</span>
-            </div>
+        <div class="mb-6">
+            <flux:badge size="lg" color="green" variant="solid" icon="check-circle">
+                {{ session('success') }}
+            </flux:badge>
         </div>
     @endif>
 
@@ -371,44 +354,30 @@ new class extends Component {
                                 <div class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ $walkthrough->description }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <button wire:click="toggleActive({{ $walkthrough->id }})" 
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition {{ $walkthrough->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                <flux:badge 
+                                    wire:click="toggleActive({{ $walkthrough->id }})" 
+                                    size="sm" 
+                                    :color="$walkthrough->is_active ? 'green' : 'gray'"
+                                    class="cursor-pointer">
                                     {{ $walkthrough->is_active ? 'Active' : 'Inactive' }}
-                                </button>
+                                </flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <button wire:click="openEditModal({{ $walkthrough->id }})" 
-                                            class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button wire:click="confirmDelete({{ $walkthrough->id }})" 
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <flux:button icon="pencil" size="sm" variant="ghost" wire:click="openEditModal({{ $walkthrough->id }})" />
+                                    <flux:button icon="trash" size="sm" variant="ghost" color="red" wire:click="confirmDelete({{ $walkthrough->id }})" />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No walkthrough screens found</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first walkthrough screen.</p>
-                                <div class="mt-6">
-                                    <x-button variant="primary" wire:click="openCreateModal">
-                                        <x-slot:iconLeft>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </x-slot:iconLeft>
-                                        Add New Screen
-                                    </x-button>
-                                </div>
+                                <flux:icon.book-open class="w-16 h-16 mx-auto text-zinc-400 mb-4" />
+                                <flux:heading size="lg" class="mb-2">No walkthrough screens found</flux:heading>
+                                <flux:text class="mb-6">Get started by creating your first walkthrough screen.</flux:text>
+                                <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
+                                    Add New Screen
+                                </flux:button>
                             </td>
                         </tr>
                     @endforelse
@@ -425,127 +394,113 @@ new class extends Component {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <x-confirmation-modal wire:model="confirmingDelete">
-        <x-slot:title>Delete Walkthrough Screen</x-slot:title>
-        <x-slot:content>
-            Are you sure you want to delete this walkthrough screen? This action cannot be undone.
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="danger" wire:click="delete" wire:loading.attr="disabled">Delete</x-button>
-        </x-slot:footer>
-    </x-confirmation-modal>
+    <flux:modal name="confirmingDelete" class="space-y-6">
+        <div>
+            <flux:heading size="lg">Delete Walkthrough Screen</flux:heading>
+            <flux:subheading>Are you sure you want to delete this walkthrough screen? This action cannot be undone.</flux:subheading>
+        </div>
+
+        <div class="flex gap-2 justify-end">
+            <flux:button variant="ghost" wire:click="$set('confirmingDelete', false)">Cancel</flux:button>
+            <flux:button variant="danger" wire:click="delete">Delete</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Create Walkthrough Modal -->
-    <x-modal wire:model="showCreateModal" max-width="2xl">
-        <x-slot:title>Create Walkthrough Screen</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="save" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter walkthrough title" />
+    <flux:modal name="showCreateModal" class="space-y-6">
+        <div>
+            <flux:heading size="lg">Create Walkthrough Screen</flux:heading>
+        </div>
 
-                <x-form.textarea 
-                    wire:model.defer="description" 
-                    label="Description" 
-                    name="description" 
-                    required 
-                    rows="4"
-                    placeholder="Enter walkthrough description" />
+        <form wire:submit.prevent="save" class="space-y-6">
+            <flux:input wire:model.defer="title" 
+                       label="Title" 
+                       placeholder="Enter walkthrough title" 
+                       required />
 
-                <x-form.file-upload 
-                    wire:model="image" 
-                    label="Screen Image" 
-                    name="image" 
-                    required 
-                    accept="image/*" 
-                    help="Upload an image for this walkthrough screen (max 2MB)" />
+            <flux:textarea wire:model.defer="description" 
+                          label="Description" 
+                          rows="4"
+                          placeholder="Enter walkthrough description" 
+                          required />
 
-                <div class="grid grid-cols-2 gap-4">
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
+            <flux:input type="file" 
+                       wire:model="image" 
+                       label="Screen Image" 
+                       accept="image/*"
+                       description="Upload an image for this walkthrough screen (max 2MB)"
+                       required />
 
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
-                    </div>
-                </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="save" :loading="true">Create Screen</x-button>
-        </x-slot:footer>
-    </x-modal>
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input wire:model.defer="sort_order" 
+                           label="Sort Order" 
+                           type="number" 
+                           min="0"
+                           required />
+
+                <flux:checkbox wire:model.defer="is_active" 
+                              label="Active" 
+                              description="Enable this screen" />
+            </div>
+        </form>
+
+        <div class="flex gap-2 justify-end">
+            <flux:button variant="ghost" wire:click="$set('showCreateModal', false)">Cancel</flux:button>
+            <flux:button variant="primary" wire:click="save">Create Screen</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Edit Walkthrough Modal -->
-    <x-modal wire:model="showEditModal" max-width="2xl">
-        <x-slot:title>Edit Walkthrough Screen</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="update" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter walkthrough title" />
+    <flux:modal name="showEditModal" class="space-y-6">
+        <div>
+            <flux:heading size="lg">Edit Walkthrough Screen</flux:heading>
+        </div>
 
-                <x-form.textarea 
-                    wire:model.defer="description" 
-                    label="Description" 
-                    name="description" 
-                    required 
-                    rows="4"
-                    placeholder="Enter walkthrough description" />
+        <form wire:submit.prevent="update" class="space-y-6">
+            <flux:input wire:model.defer="title" 
+                       label="Title" 
+                       placeholder="Enter walkthrough title" 
+                       required />
 
-                <x-form.file-upload 
-                    wire:model="image" 
-                    label="Screen Image" 
-                    name="image" 
-                    :current-file="$existing_image" 
-                    accept="image/*" 
-                    help="Upload a new image to replace the current one (max 2MB)"
-                    wire:remove="removeExistingImage" />
+            <flux:textarea wire:model.defer="description" 
+                          label="Description" 
+                          rows="4"
+                          placeholder="Enter walkthrough description" 
+                          required />
 
-                <div class="grid grid-cols-2 gap-4">
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
-
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
+            <div>
+                <flux:input type="file" 
+                           wire:model="image" 
+                           label="Screen Image" 
+                           accept="image/*"
+                           description="Upload a new image to replace the current one (max 2MB)" />
+                
+                @if ($existing_image)
+                    <div class="mt-2 flex items-center gap-2">
+                        <img src="{{ asset('storage/' . $existing_image) }}" class="w-20 h-20 rounded object-cover" alt="Current image">
+                        <flux:button size="sm" variant="ghost" wire:click="removeExistingImage">Remove</flux:button>
                     </div>
-                </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="update" :loading="true">Update Screen</x-button>
-        </x-slot:footer>
-    </x-modal>
+                @endif
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input wire:model.defer="sort_order" 
+                           label="Sort Order" 
+                           type="number" 
+                           min="0"
+                           required />
+
+                <flux:checkbox wire:model.defer="is_active" 
+                              label="Active" 
+                              description="Enable this screen" />
+            </div>
+        </form>
+
+        <div class="flex gap-2 justify-end">
+            <flux:button variant="ghost" wire:click="$set('showEditModal', false)">Cancel</flux:button>
+            <flux:button variant="primary" wire:click="update">Update Screen</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Loading Overlay -->
     <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">

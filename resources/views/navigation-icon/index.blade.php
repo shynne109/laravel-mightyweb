@@ -102,6 +102,7 @@ new class extends Component {
         $maxOrder = NavigationIcon::where('position', $this->position)->max('sort_order');
         $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
         $this->showCreateModal = true;
+        $this->dispatch('open-modal', name: 'showCreateModal');
     }
 
     public function openEditModal(int $id): void
@@ -118,6 +119,7 @@ new class extends Component {
         $this->is_active = $navIcon->is_active;
         
         $this->showEditModal = true;
+        $this->dispatch('open-modal', name: 'showEditModal');
     }
 
     public function save(): void
@@ -142,6 +144,7 @@ new class extends Component {
 
         session()->flash('success', 'Navigation icon created successfully!');
         $this->showCreateModal = false;
+        $this->dispatch('close-modal', name: 'showCreateModal');
         $this->resetForm();
     }
 
@@ -171,6 +174,7 @@ new class extends Component {
 
         session()->flash('success', 'Navigation icon updated successfully!');
         $this->showEditModal = false;
+        $this->dispatch('close-modal', name: 'showEditModal');
         $this->resetForm();
     }
 
@@ -178,6 +182,7 @@ new class extends Component {
     {
         $this->confirmingDelete = true;
         $this->deleteId = $id;
+        $this->dispatch('open-modal', name: 'confirmingDelete');
     }
 
     public function delete(): void
@@ -190,14 +195,15 @@ new class extends Component {
                     $fileService = app(FileUploadService::class);
                     $fileService->deleteFile($navIcon->icon);
                 }
-                
                 $navIcon->delete();
                 session()->flash('success', 'Navigation icon deleted successfully!');
             }
         }
 
         $this->confirmingDelete = false;
+        $this->dispatch('close-modal', name: 'confirmingDelete');
         $this->deleteId = null;
+    }   $this->deleteId = null;
     }
 
     public function toggleActive(int $id): void
@@ -261,62 +267,42 @@ new class extends Component {
     <!-- Header -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 size="xl">Navigation Icons</h2>
-            <p size="sm" class="text-gray-600 dark:text-gray-400">Manage left and right navigation bar icons</p>
+            <flux:heading size="xl">Navigation Icons</flux:heading>
+            <flux:subheading>Manage left and right navigation bar icons</flux:subheading>
         </div>
-        <x-button variant="primary" wire:click="openCreateModal">
-            <x-slot:iconLeft>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </x-slot:iconLeft>
+        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
             Add New Icon
-        </x-button>
+        </flux:button>
     </div>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <div class="relative">
-                <input type="text" 
-                       wire:model.debounce.300ms="search" 
+            <flux:input wire:model.live.debounce.300ms="search" 
                        placeholder="Search by title or action..." 
-                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
+                       icon="magnifying-glass" />
         </div>
         <div class="flex items-center gap-4">
-            <select wire:model="filterPosition" 
-                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="all">All Positions</option>
-                <option value="left">Left Icons</option>
-                <option value="right">Right Icons</option>
-            </select>
-            <div class="flex items-center gap-2">
-                <label class="text-sm text-gray-600 dark:text-gray-400">Per page:</label>
-                <select wire:model="perPage" 
-                        class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
-            </div>
+            <flux:select wire:model.live="filterPosition" placeholder="Position">
+                <flux:option value="all">All Positions</flux:option>
+                <flux:option value="left">Left Icons</flux:option>
+                <flux:option value="right">Right Icons</flux:option>
+            </flux:select>
+            <flux:select wire:model.live="perPage" placeholder="Per page">
+                <flux:option value="5">5</flux:option>
+                <flux:option value="10">10</flux:option>
+                <flux:option value="25">25</flux:option>
+                <flux:option value="50">50</flux:option>
+            </flux:select>
         </div>
     </div>
 
     <!-- Success Messages -->
     @if (session()->has('success'))
-        <div x-data="{ show: true }" 
-             x-show="show" 
-             x-init="setTimeout(() => show = false, 3000)"
-             class="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="text-green-800 dark:text-green-200">{{ session('success') }}</span>
-            </div>
+        <div class="mb-6">
+            <flux:badge size="lg" color="green" variant="solid" icon="check-circle">
+                {{ session('success') }}
+            </flux:badge>
         </div>
     @endif
 
@@ -422,61 +408,41 @@ new class extends Component {
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $icon->title }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $icon->position === 'left' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' }}">
-                                    @if ($icon->position === 'left')
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    @endif
+                                <flux:badge 
+                                    size="sm" 
+                                    :color="$icon->position === 'left' ? 'blue' : 'purple'"
+                                    :icon="$icon->position === 'left' ? 'arrow-left' : 'arrow-right'">
                                     {{ ucfirst($icon->position) }}
-                                </span>
+                                </flux:badge>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-500 dark:text-gray-400 font-mono truncate max-w-xs">{{ $icon->action }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <button wire:click="toggleActive({{ $icon->id }})" 
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition {{ $icon->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
+                                <flux:badge 
+                                    wire:click="toggleActive({{ $icon->id }})" 
+                                    size="sm" 
+                                    :color="$icon->is_active ? 'green' : 'gray'"
+                                    class="cursor-pointer">
                                     {{ $icon->is_active ? 'Active' : 'Inactive' }}
-                                </button>
+                                </flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <button wire:click="openEditModal({{ $icon->id }})" 
-                                            class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button wire:click="confirmDelete({{ $icon->id }})" 
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <flux:button icon="pencil" size="sm" variant="ghost" wire:click="openEditModal({{ $icon->id }})" />
+                                    <flux:button icon="trash" size="sm" variant="ghost" color="red" wire:click="confirmDelete({{ $icon->id }})" />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-12 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No navigation icons found</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new navigation icon.</p>
-                                <div class="mt-6">
-                                    <x-button variant="primary" wire:click="openCreateModal">
-                                        <x-slot:iconLeft>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </x-slot:iconLeft>
-                                        Add New Icon
-                                    </x-button>
-                                </div>
+                                <flux:icon.bolt class="w-16 h-16 mx-auto text-zinc-400 mb-4" />
+                                <flux:heading size="lg" class="mb-2">No navigation icons found</flux:heading>
+                                <flux:text class="mb-6">Get started by creating a new navigation icon.</flux:text>
+                                <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
+                                    Add New Icon
+                                </flux:button>
                             </td>
                         </tr>
                     @endforelse
@@ -493,145 +459,146 @@ new class extends Component {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <x-confirmation-modal wire:model="confirmingDelete">
-        <x-slot:title>Delete Navigation Icon</x-slot:title>
-        <x-slot:content>
-            Are you sure you want to delete this navigation icon? This action cannot be undone.
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="danger" wire:click="delete" wire:loading.attr="disabled">Delete</x-button>
-        </x-slot:footer>
-    </x-confirmation-modal>
+    <flux:modal name="confirmingDelete" class="md:w-96">
+        <form wire:submit="delete" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Delete Navigation Icon</flux:heading>
+                <flux:subheading>
+                    <p class="mt-2">Are you sure you want to delete this navigation icon? This action cannot be undone.</p>
+                </flux:subheading>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="danger" type="submit">Delete</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Create Icon Modal -->
-    <x-modal wire:model="showCreateModal" max-width="2xl">
-        <x-slot:title>Create Navigation Icon</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="save" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Icon Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter icon title" />
+    <flux:modal name="showCreateModal" class="md:w-[600px]">
+        <form wire:submit="save" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Create Navigation Icon</flux:heading>
+            </div>
 
-                <x-form.input 
-                    wire:model.defer="action" 
-                    label="Action/URL" 
-                    name="action" 
-                    required 
-                    placeholder="https://example.com or action name" 
-                    help="The URL or action to trigger when icon is clicked" />
+            <flux:input 
+                wire:model.defer="title" 
+                label="Icon Title" 
+                name="title" 
+                placeholder="Enter icon title" />
 
-                <x-form.file-upload 
-                    wire:model="icon" 
-                    label="Icon Image" 
-                    name="icon" 
-                    required 
-                    accept="image/*" 
-                    help="Upload an icon image (max 2MB)" />
+            <flux:input 
+                wire:model.defer="action" 
+                label="Action/URL" 
+                name="action" 
+                placeholder="https://example.com or action name" 
+                description="The URL or action to trigger when icon is clicked" />
 
-                <div class="grid grid-cols-3 gap-4">
-                    <x-form.select 
-                        wire:model="position" 
-                        label="Position" 
-                        name="position" 
-                        required>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </x-form.select>
+            <x-form.file-upload 
+                wire:model="icon" 
+                label="Icon Image" 
+                name="icon" 
+                required 
+                accept="image/*" 
+                help="Upload an icon image (max 2MB)" />
 
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
+            <div class="grid grid-cols-3 gap-4">
+                <flux:select 
+                    wire:model="position" 
+                    label="Position" 
+                    name="position">
+                    <flux:option value="left">Left</flux:option>
+                    <flux:option value="right">Right</flux:option>
+                </flux:select>
 
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
-                    </div>
+                <flux:input 
+                    wire:model.defer="sort_order" 
+                    label="Sort Order" 
+                    name="sort_order" 
+                    type="number" 
+                    min="0" />
+
+                <div class="flex items-center pt-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               wire:model.defer="is_active" 
+                               class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                    </label>
                 </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="save" :loading="true">Create Icon</x-button>
-        </x-slot:footer>
-    </x-modal>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="primary" type="submit">Create Icon</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Edit Icon Modal -->
-    <x-modal wire:model="showEditModal" max-width="2xl">
-        <x-slot:title>Edit Navigation Icon</x-slot:title>
-        <x-slot:content>
-            <form wire:submit.prevent="update" class="space-y-6">
-                <x-form.input 
-                    wire:model.defer="title" 
-                    label="Icon Title" 
-                    name="title" 
-                    required 
-                    placeholder="Enter icon title" />
+    <flux:modal name="showEditModal" class="md:w-[600px]">
+        <form wire:submit="update" class="space-y-6">
+            <div>
+                <flux:heading size="lg">Edit Navigation Icon</flux:heading>
+            </div>
 
-                <x-form.input 
-                    wire:model.defer="action" 
-                    label="Action/URL" 
-                    name="action" 
-                    required 
-                    placeholder="https://example.com or action name" 
-                    help="The URL or action to trigger when icon is clicked" />
+            <flux:input 
+                wire:model.defer="title" 
+                label="Icon Title" 
+                name="title" 
+                placeholder="Enter icon title" />
 
-                <x-form.file-upload 
-                    wire:model="icon" 
-                    label="Icon Image" 
-                    name="icon" 
-                    :current-file="$existing_icon" 
-                    accept="image/*" 
-                    help="Upload a new icon to replace the current one (max 2MB)"
-                    wire:remove="removeExistingIcon" />
+            <flux:input 
+                wire:model.defer="action" 
+                label="Action/URL" 
+                name="action" 
+                placeholder="https://example.com or action name" 
+                description="The URL or action to trigger when icon is clicked" />
 
-                <div class="grid grid-cols-3 gap-4">
-                    <x-form.select 
-                        wire:model="position" 
-                        label="Position" 
-                        name="position" 
-                        required>
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </x-form.select>
+            <x-form.file-upload 
+                wire:model="icon" 
+                label="Icon Image" 
+                name="icon" 
+                :current-file="$existing_icon" 
+                accept="image/*" 
+                help="Upload a new icon to replace the current one (max 2MB)"
+                wire:remove="removeExistingIcon" />
 
-                    <x-form.input 
-                        wire:model.defer="sort_order" 
-                        label="Sort Order" 
-                        name="sort_order" 
-                        type="number" 
-                        required 
-                        min="0" />
+            <div class="grid grid-cols-3 gap-4">
+                <flux:select 
+                    wire:model="position" 
+                    label="Position" 
+                    name="position">
+                    <flux:option value="left">Left</flux:option>
+                    <flux:option value="right">Right</flux:option>
+                </flux:select>
 
-                    <div class="flex items-center pt-6">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model.defer="is_active" 
-                                   class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
-                        </label>
-                    </div>
+                <flux:input 
+                    wire:model.defer="sort_order" 
+                    label="Sort Order" 
+                    name="sort_order" 
+                    type="number" 
+                    min="0" />
+
+                <div class="flex items-center pt-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               wire:model.defer="is_active" 
+                               class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                    </label>
                 </div>
-            </form>
-        </x-slot:content>
-        <x-slot:footer>
-            <x-button variant="secondary" @click="show = false">Cancel</x-button>
-            <x-button variant="primary" wire:click="update" :loading="true">Update Icon</x-button>
-        </x-slot:footer>
-    </x-modal>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <flux:button variant="ghost" type="button" flux:close>Cancel</flux:button>
+                <flux:button variant="primary" type="submit">Update Icon</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <!-- Loading Overlay -->
     <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">
