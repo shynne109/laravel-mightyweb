@@ -1,6 +1,5 @@
 {
     "name": "shynne109/mightyweb",
-    "version": "1.1.0",
     "description": "Laravel package for mobile app configuration management with Livewire Volt, Flux, and Tailwind CSS",
     "keywords": [
         "laravel",
@@ -10,7 +9,6 @@
         "tailwind",
         "alpine"
     ],
-    "type": "library",
     "license": "MIT",
     "authors": [
         {
@@ -49,7 +47,5 @@
                 "MightyWeb\\MightyWebServiceProvider"
             ]
         }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
