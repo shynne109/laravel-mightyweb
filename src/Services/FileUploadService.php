@@ -4,8 +4,9 @@ namespace MightyWeb\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class FileUploadService
 {
@@ -17,7 +18,7 @@ class FileUploadService
      * @param string|null $oldFile
      * @return string|false
      */
-    public function uploadImage(UploadedFile $file, string $directory, ?string $oldFile = null)
+    public function uploadImage(UploadedFile $file, string $directory, ?string $oldFile = null, $width = null, $height = null)
     {
         // Validate image
         if (!$this->isValidImage($file)) {
@@ -35,7 +36,7 @@ class FileUploadService
 
         // Optimize and save image
         if ($optimize) {
-            $this->optimizeAndSave($file, $disk, $fullPath);
+            $this->optimizeAndSave($file, $disk, $fullPath, $width, $height);
         } else {
             Storage::disk($disk)->put($fullPath, file_get_contents($file->getRealPath()));
         }
@@ -100,30 +101,26 @@ class FileUploadService
      * @param string $path
      * @return void
      */
-    protected function optimizeAndSave(UploadedFile $file, string $disk, string $path): void
+    protected function optimizeAndSave(UploadedFile $file, string $disk, string $path, $imageWidth = null, $imageHeight = null): void
     {
         $maxWidth = config('mightyweb.images.max_width', 2000);
         $maxHeight = config('mightyweb.images.max_height', 2000);
         $quality = config('mightyweb.images.quality', 85);
-
-        // Load image
-        $image = Image::make($file->getRealPath());
-
+        // create new image instance
+        $image = ImageManager::gd()->read($file);
         // Get original dimensions
         $width = $image->width();
         $height = $image->height();
 
+        if ($imageWidth != null || $imageHeight != null) {
+            $image->resize($imageWidth, $imageHeight);
+        }
         // Resize if necessary (maintain aspect ratio)
         if ($width > $maxWidth || $height > $maxHeight) {
-            $image->resize($maxWidth, $maxHeight, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+            $image->resize($maxWidth, $maxHeight);
         }
-
         // Encode with quality
-        $encoded = $image->encode($file->getClientOriginalExtension(), $quality);
-
+        $encoded = $image->toPng();
         // Save to storage
         Storage::disk($disk)->put($path, $encoded->__toString());
     }
@@ -215,7 +212,7 @@ class FileUploadService
         }
 
         try {
-            $image = Image::make(Storage::disk($disk)->get($fullPath));
+            $image = ImageManager::gd()->read(Storage::disk($disk)->get($fullPath));
             return [
                 'width' => $image->width(),
                 'height' => $image->height(),
@@ -250,10 +247,9 @@ class FileUploadService
 
         try {
             // Load original image
-            $image = Image::make(Storage::disk($disk)->get($fullPath));
-
+            $image = ImageManager::gd()->read(Storage::disk($disk)->get($fullPath));
             // Create thumbnail
-            $image->fit($width, $height);
+            $image->cover($width, $height, 'center');
 
             // Generate thumbnail filename
             $pathInfo = pathinfo($filename);
