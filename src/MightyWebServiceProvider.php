@@ -75,7 +75,7 @@ class MightyWebServiceProvider extends ServiceProvider
 
         // Publish views
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/mightyweb'),
+            __DIR__.'/../resources/views' => resource_path('views/livewire/mightyweb'),
         ], 'mightyweb-views');
 
         // Publish public assets (pre-built CSS/JS)
@@ -109,15 +109,6 @@ class MightyWebServiceProvider extends ServiceProvider
         Blade::directive('mightywebScripts', function () {
             return "<?php echo view('mightyweb::layouts.scripts')->render(); ?>";
         });
-        
-        // Register Flux directives as aliases for convenience
-        Blade::directive('fluxAppearance', function () {
-            return "<?php echo \Livewire\Flux\Flux::appearance(); ?>";
-        });
-        
-        Blade::directive('fluxScripts', function () {
-            return "<?php echo \Livewire\Flux\Flux::scripts(); ?>";
-        });
     }
 
     /**
@@ -131,7 +122,7 @@ class MightyWebServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         // Register the unified Dashboard component (class-based, not Volt)
-        Livewire::component('mightyweb.dashboard', \MightyWeb\Http\Livewire\Dashboard::class);
+        #Livewire::component('mightyweb.dashboard', \MightyWeb\Http\Livewire\Dashboard::class);
         
         // Volt components are auto-discovered from:
         // - resources/views/livewire/floating-button/index.blade.php
