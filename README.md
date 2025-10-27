@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/shynne109/mightyweb"><img src="https://img.shields.io/packagist/v/shynne109/mightyweb" alt="Latest Version"></a>
-    <a href="https://packagist.org/packages/shynne109/mightyweb"><img src="https://img.shields.io/packagist/dt/shynne109/mightyweb" alt="Total Downloads"></a>
-    <a href="https://packagist.org/packages/shynne109/mightyweb"><img src="https://img.shields.io/packagist/l/shynne109/mightyweb" alt="License"></a>
+    <a href="https://packagist.org/packages/shynne109/laravel-mightyweb"><img src="https://img.shields.io/packagist/v/shynne109/laravel-mightyweb" alt="Latest Version"></a>
+    <a href="https://packagist.org/packages/shynne109/laravel-mightyweb"><img src="https://img.shields.io/packagist/dt/shynne109/laravel-mightyweb" alt="Total Downloads"></a>
+    <a href="https://packagist.org/packages/shynne109/laravel-mightyweb"><img src="https://img.shields.io/packagist/l/shynne109/laravel-mightyweb" alt="License"></a>
 </p>
 
 ---
@@ -74,7 +74,7 @@ Perfect for managing Flutter, React Native, or any mobile app that needs dynamic
 ### Step 1: Install Package
 
 ```bash
-composer require shynne109/mightyweb
+composer require shynne109/laravel-mightyweb
 ```
 
 ### Step 2: Run Migrations
@@ -319,7 +319,7 @@ If you need to customize and rebuild the package assets:
 
 **1. Navigate to package directory:**
 ```bash
-cd vendor/shynne109/mightyweb
+cd vendor/shynne109/laravel-mightyweb
 ```
 
 **2. Install dependencies:**
@@ -379,7 +379,7 @@ $save = function() {
 ### File Structure
 
 ```
-shynne109/mightyweb/
+shynne109/laravel-mightyweb/
 ├── src/
 │   ├── Models/              # 9 Eloquent models
 │   ├── Http/Controllers/    # 3 controllers
@@ -486,7 +486,7 @@ php artisan view:clear
 export default {
     content: [
         './resources/**/*.blade.php',
-        './vendor/shynne109/mightyweb/resources/**/*.blade.php',
+        './vendor/shynne109/laravel-mightyweb/resources/**/*.blade.php',
     ],
     // ...
 }

@@ -115,7 +115,7 @@ MightyWeb is a comprehensive Laravel package for managing mobile app configurati
 
 ```bash
 # Install package
-composer require shynne109/mightyweb
+composer require shynne109/laravel-mightyweb
 
 # Run migrations
 php artisan migrate
@@ -216,10 +216,10 @@ Default configuration includes database connection, storage paths, and image set
 
 ## Links
 
-- **Repository**: https://github.com/shynne109/mightyweb
-- **Issues**: https://github.com/shynne109/mightyweb/issues
+- **Repository**: https://github.com/shynne109/laravel-mightyweb
+- **Issues**: https://github.com/shynne109/laravel-mightyweb/issues
 - **Documentation**: See README.md
 
 ---
 
-[1.0.0]: https://github.com/shynne109/mightyweb/releases/tag/v1.0.0
+[1.0.0]: https://github.com/shynne109/laravel-mightyweb/releases/tag/v1.0.0

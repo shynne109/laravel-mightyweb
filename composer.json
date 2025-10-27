@@ -1,5 +1,5 @@
 {
-    "name": "shynne109/mightyweb",
+    "name": "shynne109/laravel-mightyweb",
     "description": "Laravel package for mobile app configuration management with Livewire Volt, Flux, and Tailwind CSS",
     "keywords": [
         "laravel",
