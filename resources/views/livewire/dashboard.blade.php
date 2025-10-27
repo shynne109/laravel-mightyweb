@@ -1,3 +1,14 @@
+<?php
+
+use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
+use MightyWeb\Models\AppSetting;
+use MightyWeb\Services\FileUploadService;
+
+new class extends Component {
+
+}
+?>
 <div class="min-h-screen bg-gray-50 dark:bg-zinc-900">
     {{-- Header --}}
     <div class="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40">

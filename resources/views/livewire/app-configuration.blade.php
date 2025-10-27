@@ -2,8 +2,8 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
-use MightyWeb\MightyWeb\Models\AppSetting;
-use MightyWeb\MightyWeb\Services\FileUploadService;
+use MightyWeb\Models\AppSetting;
+use MightyWeb\Services\FileUploadService;
 
 new class extends Component {
     use WithFileUploads;

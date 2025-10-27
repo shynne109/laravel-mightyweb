@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Volt\Component;
-use MightyWeb\MightyWeb\Models\Theme;
+use MightyWeb\Models\Theme;
 
 new class extends Component {
     public ?Theme $theme = null;

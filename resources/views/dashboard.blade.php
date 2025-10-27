@@ -27,7 +27,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Walkthrough Screens</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ \MightyWeb\MightyWeb\Models\Walkthrough::count() }}
+                            {{ \MightyWeb\Models\Walkthrough::count() }}
                         </p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
@@ -48,7 +48,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Menu Items</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ \MightyWeb\MightyWeb\Models\Menu::count() }}
+                            {{ \MightyWeb\Models\Menu::count() }}
                         </p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -69,7 +69,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Bottom Tabs</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ \MightyWeb\MightyWeb\Models\Tab::count() }}
+                            {{ \MightyWeb\Models\Tab::count() }}
                         </p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
@@ -90,7 +90,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pages</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ \MightyWeb\MightyWeb\Models\Page::count() }}
+                            {{ \MightyWeb\Models\Page::count() }}
                         </p>
                     </div>
                     <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
@@ -157,7 +157,7 @@
                 <div class="p-6 space-y-4">
                     
                     @php
-                        $appSettings = \MightyWeb\MightyWeb\Models\AppSetting::pluck('value', 'key')->toArray();
+                        $appSettings = \MightyWeb\Models\AppSetting::pluck('value', 'key')->toArray();
                     @endphp
 
                     <!-- App Name & Version -->
@@ -240,9 +240,9 @@
         </div>
 
         <!-- Getting Started Guide (Optional - shown when stats are zero) -->
-        @if (\MightyWeb\MightyWeb\Models\Walkthrough::count() === 0 && 
-             \MightyWeb\MightyWeb\Models\Menu::count() === 0 && 
-             \MightyWeb\MightyWeb\Models\Tab::count() === 0)
+        @if (\MightyWeb\Models\Walkthrough::count() === 0 && 
+             \MightyWeb\Models\Menu::count() === 0 && 
+             \MightyWeb\Models\Tab::count() === 0)
         <div class="mt-8 bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 rounded-lg border border-primary-200 dark:border-primary-700 p-6">
             <div class="flex items-start">
                 <div class="flex-shrink-0">

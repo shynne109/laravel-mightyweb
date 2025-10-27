@@ -2,8 +2,8 @@
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use MightyWeb\MightyWeb\Models\Page;
-use MightyWeb\MightyWeb\Services\FileUploadService;
+use MightyWeb\Models\Page;
+use MightyWeb\Services\FileUploadService;
 
 new class extends Component {
     use WithPagination, WithFileUploads;
