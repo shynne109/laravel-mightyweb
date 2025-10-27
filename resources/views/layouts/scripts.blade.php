@@ -2,10 +2,6 @@
 
 {{-- Package JavaScript --}}
 <script src="{{ asset('vendor/mightyweb/build/assets/app-Ce2q4hT9.js') }}" defer></script>
-
-{{-- Livewire Flux Scripts (includes interactive components) --}}
-@fluxScripts
-
 {{-- Additional Package Scripts --}}
 <script>
     // Auto-dismiss success messages after 3 seconds

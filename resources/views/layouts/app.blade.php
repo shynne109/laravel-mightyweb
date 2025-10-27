@@ -90,6 +90,7 @@
 
     @stack('styles')
     @livewireStyles
+    @fluxAppearance
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen">
@@ -171,10 +172,10 @@
             @include('mightyweb::layouts.footer')
         </div>
     </div>
-
     @stack('scripts')
-    @livewireScripts
-    
+    @livewireScripts    
+    {{-- Livewire Flux Scripts (includes interactive components) --}}
+    @fluxScripts    
     <!-- MightyWeb Package Scripts -->
     @mightywebScripts
 </body>
