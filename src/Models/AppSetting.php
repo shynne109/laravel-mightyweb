@@ -77,7 +77,7 @@ class AppSetting extends Model
      *
      * @return array
      */
-    public static function all(): array
+    public static function getAllSettings(): array
     {
         return static::query()
             ->pluck('value', 'key')
