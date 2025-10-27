@@ -21,6 +21,7 @@ $routeConfig = config('mightyweb.route', [
     'name_prefix' => 'mightyweb.',
 ]);
 
+
 Route::prefix($routeConfig['prefix'])
     ->middleware($routeConfig['middleware'])
     ->name($routeConfig['name_prefix'])
@@ -149,6 +150,6 @@ Route::prefix($routeConfig['prefix'])
         })->name('user-agent');
         
         // JSON Export
-        Route::post('/export-json', [JsonExportController::class, 'export'])->name('export-json');
-        Route::get('/download-json', [JsonExportController::class, 'download'])->name('download-json');
+        Route::post('/export-json', [JsonExportController::class, 'export'])->name('json.export');
+        Route::get('/download-json', [JsonExportController::class, 'download'])->name('json.download');
     });
