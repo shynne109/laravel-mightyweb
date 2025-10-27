@@ -526,7 +526,12 @@ composer dump-autoload
 composer show livewire/livewire
 ```
 
-4. Ensure the MightyWeb service provider is loaded (check `composer.json`):
+4. Ensure the MightyWeb service provider is loaded:
+
+**Laravel 12+ Auto-Discovery (Default)**
+
+The package service provider is automatically registered via `composer.json`:
+
 ```json
 "extra": {
     "laravel": {
@@ -535,6 +540,25 @@ composer show livewire/livewire
         ]
     }
 }
+```
+
+**Manual Registration (if needed)**
+
+If auto-discovery fails, add to `bootstrap/providers.php`:
+
+```php
+<?php
+
+return [
+    App\Providers\AppServiceProvider::class,
+    MightyWeb\MightyWebServiceProvider::class, // Add this
+];
+```
+
+Then run:
+```bash
+php artisan optimize:clear
+composer dump-autoload
 ```
 
 5. If still not working, try publishing the views:
