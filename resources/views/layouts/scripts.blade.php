@@ -1,7 +1,7 @@
 {{-- MightyWeb Package Scripts - Footer --}}
 
 {{-- Package JavaScript --}}
-<script src="{{ asset('vendor/mightyweb/build/assets/app-Ce2q4hT9.js') }}" defer></script>
+<script src="{{ asset('vendor/mightyweb/build/assets/app-BzumFlqk.js') }}" defer></script>
 {{-- Additional Package Scripts --}}
 <script>
     // Auto-dismiss success messages after 3 seconds

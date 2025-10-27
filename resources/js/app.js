@@ -1,8 +1,3 @@
-import Alpine from 'alpinejs';
-
-// Initialize Alpine.js
-window.Alpine = Alpine;
-Alpine.start();
 
 // MightyWeb Admin Panel JavaScript
 document.addEventListener('DOMContentLoaded', function() {
