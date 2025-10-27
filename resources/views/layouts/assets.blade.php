@@ -1,8 +1,2 @@
 {{-- MightyWeb Package Assets via Vite --}}
-@vite(['resources/css/app.css', 'resources/js/app.js'], 'vendor/mightyweb/build')
-
-{{-- Livewire Flux Appearance (includes theme and color scheme) --}}
-@fluxAppearance
-
-{{-- Livewire Styles --}}
-@livewireStyles
+<link rel="stylesheet" href="{{ asset('vendor/mightyweb/build/assets/app-Crrsn0xv.css') }}">

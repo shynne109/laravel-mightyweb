@@ -1,5 +1,8 @@
 {{-- MightyWeb Package Scripts - Footer --}}
 
+{{-- Package JavaScript --}}
+<script src="{{ asset('vendor/mightyweb/build/assets/app-Ce2q4hT9.js') }}" defer></script>
+
 {{-- Livewire Flux Scripts (includes interactive components) --}}
 @fluxScripts
 
