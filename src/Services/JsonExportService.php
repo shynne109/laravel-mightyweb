@@ -23,24 +23,25 @@ class JsonExportService
     public function generateConfig(): array
     {
         return [
-            'app_settings' => $this->getAppSettings(),
-            'walkthrough' => $this->getWalkthroughs(),
-            'menu' => $this->getMenus(),
-            'left_header_icons' => $this->getLeftHeaderIcons(),
-            'right_header_icons' => $this->getRightHeaderIcons(),
-            'tabs' => $this->getTabs(),
-            'pages' => $this->getPages(),
-            'floating_buttons' => $this->getFloatingButtons(),
-            'theme' => $this->getTheme(),
-            'splash' => $this->getSplash(),
+            'appconfiguration' => $this->getAppSettings(),
             'admob' => $this->getAdmob(),
-            'onesignal' => $this->getOneSignal(),
-            'progress_bar' => $this->getProgressBar(),
-            'exit_popup' => $this->getExitPopup(),
-            'share' => $this->getShare(),
+            'progressbar' => $this->getProgressBar(),
+            'theme' => $this->getTheme(),
             'about' => $this->getAbout(),
-            'user_agent' => $this->getUserAgent(),
-            'generated_at' => now()->toIso8601String(),
+            'onesignal_configuration' => $this->getOneSignal(),
+            'menu_style' => $this->getMenus(),
+            'header_icon' => [
+                'lefticon' => $this->getLeftHeaderIcons(),
+                'righticon' => $this->getRightHeaderIcons(),
+            ],
+            'walkthrough' => $this->getWalkthroughs(),
+            'floating_button' => $this->getFloatingButtons(),
+            'user_agent' => $this->getUserAgent() ? [$this->getUserAgent()] : [],
+            'tabs' => $this->getTabs(),
+            'splash_configuration' => $this->getSplash(),
+            'exitpopup_configuration' => $this->getExitPopup(),
+            'pages' => $this->getPages(),
+            'share_content' => $this->getShare(),
         ];
     }
 
@@ -101,13 +102,11 @@ class JsonExportService
             ->get()
             ->map(function ($walkthrough) {
                 return [
-                    'id' => $walkthrough->id,
+                    'id' => (string) $walkthrough->id,
                     'title' => $walkthrough->title,
                     'subtitle' => $walkthrough->subtitle,
-                    'description' => $walkthrough->subtitle, // Alias for compatibility
                     'image' => $walkthrough->image_url,
                     'status' => $walkthrough->status,
-                    'order' => $walkthrough->order,
                 ];
             })
             ->toArray();
@@ -139,13 +138,13 @@ class JsonExportService
     protected function formatMenu(Menu $menu): array
     {
         $data = [
-            'id' => $menu->id,
+            'id' => (string) $menu->id,
             'title' => $menu->title,
-            'type' => $menu->type,
+            'type' => $menu->type ?? 'link',
             'image' => $menu->image_url,
             'url' => $menu->url,
             'status' => $menu->status,
-            'order' => $menu->order,
+            'parent_id' => $menu->parent_id ? (string) $menu->parent_id : null,
         ];
 
         // Add children if exists
@@ -169,13 +168,15 @@ class JsonExportService
             ->get()
             ->map(function ($icon) {
                 return [
-                    'id' => $icon->id,
+                    'id' => (string) $icon->id,
                     'title' => $icon->title,
                     'value' => $icon->value,
                     'image' => $icon->image_url,
                     'type' => $icon->type,
                     'url' => $icon->url,
                     'status' => $icon->status,
+                    'created_at' => $icon->created_at?->toIso8601String(),
+                    'updated_at' => $icon->updated_at?->toIso8601String(),
                 ];
             })
             ->toArray();
@@ -192,13 +193,15 @@ class JsonExportService
             ->get()
             ->map(function ($icon) {
                 return [
-                    'id' => $icon->id,
+                    'id' => (string) $icon->id,
                     'title' => $icon->title,
                     'value' => $icon->value,
                     'image' => $icon->image_url,
                     'type' => $icon->type,
                     'url' => $icon->url,
                     'status' => $icon->status,
+                    'created_at' => $icon->created_at?->toIso8601String(),
+                    'updated_at' => $icon->updated_at?->toIso8601String(),
                 ];
             })
             ->toArray();
@@ -216,12 +219,11 @@ class JsonExportService
             ->get()
             ->map(function ($tab) {
                 return [
-                    'id' => $tab->id,
+                    'id' => (string) $tab->id,
                     'title' => $tab->title,
                     'image' => $tab->image_url,
                     'url' => $tab->url,
                     'status' => $tab->status,
-                    'order' => $tab->order,
                 ];
             })
             ->toArray();
@@ -239,12 +241,11 @@ class JsonExportService
             ->get()
             ->map(function ($page) {
                 return [
-                    'id' => $page->id,
+                    'id' => (string) $page->id,
                     'title' => $page->title,
                     'image' => $page->image_url,
                     'url' => $page->url,
                     'status' => $page->status,
-                    'order' => $page->order,
                 ];
             })
             ->toArray();
@@ -262,12 +263,11 @@ class JsonExportService
             ->get()
             ->map(function ($button) {
                 return [
-                    'id' => $button->id,
+                    'id' => (string) $button->id,
                     'title' => $button->title,
                     'image' => $button->image_url,
                     'url' => $button->url,
                     'status' => $button->status,
-                    'order' => $button->order,
                 ];
             })
             ->toArray();
@@ -383,7 +383,7 @@ class JsonExportService
         }
 
         return [
-            'id' => $userAgent->id,
+            'id' => (string) $userAgent->id,
             'title' => $userAgent->title,
             'android' => $userAgent->android,
             'ios' => $userAgent->ios,

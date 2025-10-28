@@ -45,8 +45,8 @@ class FileUploadService
         if ($oldFile) {
             $this->deleteFile($directory, $oldFile);
         }
-
-        return $filename;
+        // Return full URL instead of just filename
+        return $this->getFileUrl($directory, $filename);
     }
 
     /**
@@ -123,6 +123,8 @@ class FileUploadService
         $encoded = $image->toPng();
         // Save to storage
         Storage::disk($disk)->put($path, $encoded->__toString());
+
+
     }
 
     /**
