@@ -67,6 +67,11 @@ class JsonExportService
         }
         
         // Save to storage
+        // Delete existing file if it exists
+        if (Storage::disk($disk)->exists($fullPath)) {
+            Storage::disk($disk)->delete($fullPath);
+        }
+        
         $saved = Storage::disk($disk)->put($fullPath, $json);
         
         return $saved ? $fullPath : false;

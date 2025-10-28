@@ -46,7 +46,7 @@ return [
     */
 
     'api' => [
-        'prefix' => env('MIGHTYWEB_API_PREFIX', 'api/mightyweb'),
+        'prefix' => env('MIGHTYWEB_API_PREFIX', 'config'),
         'middleware' => ['api'],
         'rate_limit' => env('MIGHTYWEB_API_RATE_LIMIT', 60),
     ],
