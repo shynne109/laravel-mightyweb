@@ -23,7 +23,7 @@
         "illuminate/support": "^11.0|^12.0",
         "illuminate/database": "^11.0|^12.0",
         "illuminate/http": "^11.0|^12.0",
-        "livewire/livewire": "^3.5",
+        "livewire/livewire": "^3.5|^4.0",
         "livewire/flux": "^2.6",
         "intervention/image": "^3.0",
         "livewire/volt": "^1.7"
