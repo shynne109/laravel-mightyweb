@@ -1,16 +1,16 @@
 <?php
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use MightyWeb\Models\Walkthrough;
-use MightyWeb\Services\FileUploadService;
+use App\Services\App\FileUploadService;
 
 new class extends Component {
     use WithPagination, WithFileUploads;
 
     // Listing properties
     public string $search = '';
-    public string $sortField = 'sort_order';
+    public string $sortField = 'id';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
 
@@ -23,19 +23,18 @@ new class extends Component {
     public ?int $editingId = null;
     public ?int $deleteId = null;
     public string $title = '';
-    public string $description = '';
+    public string $subtitle = '';
     public $image = null;
-    public ?string $existing_image = null;
+    public $existing_image = '';
     public int $sort_order = 1;
-    public bool $is_active = true;
+    public bool $status = true;
 
     protected function rules(): array
     {
         $rules = [
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
-            'sort_order' => 'required|integer|min:0',
-            'is_active' => 'boolean',
+            'subtitle' => 'required|string|max:1000',
+            'status' => 'boolean',
         ];
 
         if ($this->showCreateModal) {
@@ -52,14 +51,11 @@ new class extends Component {
         return [
             'title.required' => 'Walkthrough title is required.',
             'title.max' => 'Title cannot exceed 255 characters.',
-            'description.required' => 'Description is required.',
-            'description.max' => 'Description cannot exceed 1000 characters.',
+            'subtitle.required' => 'Subtitle is required.',
+            'subtitle.max' => 'Subtitle cannot exceed 1000 characters.',
             'image.required' => 'Walkthrough image is required.',
             'image.image' => 'The file must be an image.',
             'image.max' => 'The image size cannot exceed 2MB.',
-            'sort_order.required' => 'Sort order is required.',
-            'sort_order.integer' => 'Sort order must be a number.',
-            'sort_order.min' => 'Sort order cannot be negative.',
         ];
     }
 
@@ -81,24 +77,27 @@ new class extends Component {
     public function openCreateModal(): void
     {
         $this->resetForm();
-        $maxOrder = Walkthrough::max('sort_order');
+        $maxOrder = Walkthrough::max('id');
         $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
         $this->showCreateModal = true;
+        $this->modal('showCreateModal')->show();
     }
 
     public function openEditModal(int $id): void
     {
+        
+
         $this->resetForm();
         $walkthrough = Walkthrough::findOrFail($id);
         
         $this->editingId = $walkthrough->id;
         $this->title = $walkthrough->title;
-        $this->description = $walkthrough->description ?? '';
+        $this->subtitle = $walkthrough->subtitle ?? '';
         $this->existing_image = $walkthrough->image;
-        $this->sort_order = $walkthrough->sort_order;
-        $this->is_active = $walkthrough->is_active;
-        
+        $this->sort_order = $walkthrough->id;
+        $this->status = $walkthrough->status;        
         $this->showEditModal = true;
+        $this->modal('showEditModal')->show();
     }
 
     public function save(): void
@@ -107,21 +106,20 @@ new class extends Component {
 
         $fileService = app(FileUploadService::class);
         $imagePath = null;
-
         if ($this->image) {
             $imagePath = $fileService->uploadImage($this->image, 'walkthrough');
         }
 
         Walkthrough::create([
             'title' => $this->title,
-            'description' => $this->description,
+            'subtitle' => $this->subtitle,
             'image' => $imagePath,
-            'sort_order' => $this->sort_order,
-            'is_active' => $this->is_active,
+            'status' => $this->status,
         ]);
 
         session()->flash('success', 'Walkthrough screen created successfully!');
         $this->showCreateModal = false;
+        $this->modal('showCreateModal')->close();
         $this->resetForm();
     }
 
@@ -134,28 +132,26 @@ new class extends Component {
         $imagePath = $this->existing_image;
 
         if ($this->image) {
-            if ($this->existing_image) {
-                $fileService->deleteFile($this->existing_image);
-            }
             $imagePath = $fileService->uploadImage($this->image, 'walkthrough');
         }
 
         $walkthrough->update([
             'title' => $this->title,
-            'description' => $this->description,
+            'subtitle' => $this->subtitle,
             'image' => $imagePath,
-            'sort_order' => $this->sort_order,
-            'is_active' => $this->is_active,
+            'status' => $this->status,
         ]);
 
         session()->flash('success', 'Walkthrough screen updated successfully!');
         $this->showEditModal = false;
+        $this->modal('showEditModal')->close();
         $this->resetForm();
     }
 
     public function confirmDelete(int $id): void
     {
         $this->confirmingDelete = true;
+        $this->modal('confirmingDelete')->show();
         $this->deleteId = $id;
     }
 
@@ -163,19 +159,13 @@ new class extends Component {
     {
         if ($this->deleteId) {
             $walkthrough = Walkthrough::find($this->deleteId);
-            
             if ($walkthrough) {
-                if ($walkthrough->image) {
-                    $fileService = app(FileUploadService::class);
-                    $fileService->deleteFile($walkthrough->image);
-                }
-                
                 $walkthrough->delete();
                 session()->flash('success', 'Walkthrough screen deleted successfully!');
             }
         }
-
         $this->confirmingDelete = false;
+        $this->modal('confirmingDelete')->close();
         $this->deleteId = null;
     }
 
@@ -184,10 +174,10 @@ new class extends Component {
         $walkthrough = Walkthrough::find($id);
         
         if ($walkthrough) {
-            $walkthrough->is_active = !$walkthrough->is_active;
+            $walkthrough->status = !$walkthrough->status;
             $walkthrough->save();
-            
-            $status = $walkthrough->is_active ? 'activated' : 'deactivated';
+
+            $status = $walkthrough->status ? 'activated' : 'deactivated';
             session()->flash('success', "Walkthrough screen {$status} successfully!");
         }
     }
@@ -196,7 +186,7 @@ new class extends Component {
     {
         if ($this->existing_image) {
             $fileService = app(FileUploadService::class);
-            $fileService->deleteFile($this->existing_image);
+            $fileService->deleteFile('walkthrough', $this->existing_image);
             $this->existing_image = null;
         }
     }
@@ -206,13 +196,13 @@ new class extends Component {
         $this->reset([
             'editingId',
             'title',
-            'description',
+            'subtitle',
             'image',
             'existing_image',
             'sort_order',
-            'is_active',
+            'status',
         ]);
-        $this->is_active = true;
+        $this->status = true;
         $this->sort_order = 1;
         $this->resetValidation();
     }
@@ -223,7 +213,7 @@ new class extends Component {
             'walkthroughs' => Walkthrough::query()
                 ->when($this->search, function ($query) {
                     $query->where('title', 'like', '%' . $this->search . '%')
-                          ->orWhere('description', 'like', '%' . $this->search . '%');
+                          ->orWhere('subtitle', 'like', '%' . $this->search . '%');
                 })
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate($this->perPage),
@@ -238,24 +228,26 @@ new class extends Component {
             <flux:heading size="xl">Walkthrough Screens</flux:heading>
             <flux:subheading>Manage onboarding screens for new users</flux:subheading>
         </div>
-        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
-            Add New Screen
-        </flux:button>
+        <flux:modal.trigger name="showCreateModal">
+            <flux:button variant="primary" icon="plus">
+                Add New Screen
+            </flux:button>
+        </flux:modal.trigger>
     </div>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" 
-                       placeholder="Search by title or description..." 
+                       placeholder="Search by title or subtitle..." 
                        icon="magnifying-glass" />
         </div>
         <div class="flex items-center gap-2">
             <flux:select wire:model.live="perPage" placeholder="Per page">
-                <flux:option value="5">5</flux:option>
-                <flux:option value="10">10</flux:option>
-                <flux:option value="25">25</flux:option>
-                <flux:option value="50">50</flux:option>
+                <flux:select.option value="5">5</flux:select.option>
+                <flux:select.option value="10">10</flux:select.option>
+                <flux:select.option value="25">25</flux:select.option>
+                <flux:select.option value="50">50</flux:select.option>
             </flux:select>
         </div>
     </div>
@@ -275,11 +267,11 @@ new class extends Component {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th wire:click="sortBy('sort_order')" 
+                        <th wire:click="sortBy('id')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Order</span>
-                                @if ($sortField === 'sort_order')
+                                @if ($sortField === 'id')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -296,7 +288,7 @@ new class extends Component {
                         <th wire:click="sortBy('title')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
-                                <span>Title & Description</span>
+                                <span>Title & Subtitle</span>
                                 @if ($sortField === 'title')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
@@ -308,11 +300,11 @@ new class extends Component {
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('is_active')" 
+                        <th wire:click="sortBy('status')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Status</span>
-                                @if ($sortField === 'is_active')
+                                @if ($sortField === 'status')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -333,12 +325,12 @@ new class extends Component {
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                    {{ $walkthrough->sort_order }}
+                                    {{ $walkthrough->id }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($walkthrough->image)
-                                    <img src="{{ asset('storage/' . $walkthrough->image) }}" 
+                                    <img src="{{ $walkthrough->image }}" 
                                          alt="{{ $walkthrough->title }}" 
                                          class="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-600">
                                 @else
@@ -351,15 +343,15 @@ new class extends Component {
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $walkthrough->title }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ $walkthrough->description }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ $walkthrough->subtitle }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <flux:badge 
                                     wire:click="toggleActive({{ $walkthrough->id }})" 
                                     size="sm" 
-                                    :color="$walkthrough->is_active ? 'green' : 'gray'"
+                                    :color="$walkthrough->status ? 'green' : 'gray'"
                                     class="cursor-pointer">
-                                    {{ $walkthrough->is_active ? 'Active' : 'Inactive' }}
+                                    {{ $walkthrough->status ? 'Active' : 'Inactive' }}
                                 </flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -407,7 +399,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Create Walkthrough Modal -->
-    <flux:modal name="showCreateModal" class="space-y-6">
+    <flux:modal variant="flyout" name="showCreateModal" class="space-y-6">
         <div>
             <flux:heading size="lg">Create Walkthrough Screen</flux:heading>
         </div>
@@ -418,17 +410,17 @@ new class extends Component {
                        placeholder="Enter walkthrough title" 
                        required />
 
-            <flux:textarea wire:model.defer="description" 
-                          label="Description" 
+            <flux:textarea wire:model.defer="subtitle" 
+                          label="Subtitle" 
                           rows="4"
-                          placeholder="Enter walkthrough description" 
+                          placeholder="Enter walkthrough subtitle" 
                           required />
 
             <flux:input type="file" 
                        wire:model="image" 
                        label="Screen Image" 
                        accept="image/*"
-                       description="Upload an image for this walkthrough screen (max 2MB)"
+                       subtitle="Upload an image for this walkthrough screen (max 2MB)"
                        required />
 
             <div class="grid grid-cols-2 gap-4">
@@ -438,9 +430,9 @@ new class extends Component {
                            min="0"
                            required />
 
-                <flux:checkbox wire:model.defer="is_active" 
+                <flux:checkbox wire:model.defer="status" 
                               label="Active" 
-                              description="Enable this screen" />
+                              subtitle="Enable this screen" />
             </div>
         </form>
 
@@ -451,7 +443,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Edit Walkthrough Modal -->
-    <flux:modal name="showEditModal" class="space-y-6">
+    <flux:modal variant="flyout" name="showEditModal" class="space-y-6">
         <div>
             <flux:heading size="lg">Edit Walkthrough Screen</flux:heading>
         </div>
@@ -462,10 +454,10 @@ new class extends Component {
                        placeholder="Enter walkthrough title" 
                        required />
 
-            <flux:textarea wire:model.defer="description" 
-                          label="Description" 
+            <flux:textarea wire:model.defer="subtitle" 
+                          label="Subtitle" 
                           rows="4"
-                          placeholder="Enter walkthrough description" 
+                          placeholder="Enter walkthrough subtitle" 
                           required />
 
             <div>
@@ -473,26 +465,18 @@ new class extends Component {
                            wire:model="image" 
                            label="Screen Image" 
                            accept="image/*"
-                           description="Upload a new image to replace the current one (max 2MB)" />
+                           subtitle="Upload a new image to replace the current one (max 2MB)" />
                 
                 @if ($existing_image)
                     <div class="mt-2 flex items-center gap-2">
-                        <img src="{{ asset('storage/' . $existing_image) }}" class="w-20 h-20 rounded object-cover" alt="Current image">
+                        <img src="{{ $existing_image }}" class="w-20 h-20 rounded object-cover" alt="Current image">
                         <flux:button size="sm" variant="ghost" wire:click="removeExistingImage">Remove</flux:button>
                     </div>
                 @endif
             </div>
-
             <div class="grid grid-cols-2 gap-4">
-                <flux:input wire:model.defer="sort_order" 
-                           label="Sort Order" 
-                           type="number" 
-                           min="0"
-                           required />
-
-                <flux:checkbox wire:model.defer="is_active" 
-                              label="Active" 
-                              description="Enable this screen" />
+                <flux:input wire:model.defer="sort_order" label="Sort Order" type="number" min="0" required />
+                <flux:checkbox wire:model.defer="status" label="Active" subtitle="Enable this screen" />
             </div>
         </form>
 
@@ -502,15 +486,6 @@ new class extends Component {
         </div>
     </flux:modal>
 
-    <!-- Loading Overlay -->
-    <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
-            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="text-gray-700 dark:text-gray-300">Processing...</span>
-        </div>
-    </div>
+   
 </div>
 

@@ -2,9 +2,9 @@
 
 namespace MightyWeb\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use MightyWeb\Models\Theme;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ThemeConfigurationTest extends TestCase
 {

@@ -2,6 +2,7 @@
 
 namespace MightyWeb\Http\Requests;
 
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SplashScreenRequest extends FormRequest
@@ -17,7 +18,7 @@ class SplashScreenRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array<string, Rule|array|string>
      */
     public function rules(): array
     {
@@ -48,16 +49,16 @@ class SplashScreenRequest extends FormRequest
             'logo.image' => 'Logo must be a valid image file.',
             'logo.mimes' => 'Logo must be a JPEG, PNG, JPG, or GIF file.',
             'logo.max' => 'Logo file size must not exceed 2MB.',
-            
+
             'background.image' => 'Background must be a valid image file.',
             'background.mimes' => 'Background must be a JPEG, PNG, JPG, or GIF file.',
             'background.max' => 'Background file size must not exceed 2MB.',
-            
+
             'duration.required' => 'Splash screen duration is required.',
             'duration.integer' => 'Duration must be a number.',
             'duration.min' => 'Duration must be at least 1 second (1000 milliseconds).',
             'duration.max' => 'Duration cannot exceed 10 seconds (10000 milliseconds).',
-            
+
             'background_color.required' => 'Background color is required.',
             'background_color.regex' => 'Background color must be a valid hex color code (e.g., #FFFFFF).',
         ];
@@ -91,9 +92,9 @@ class SplashScreenRequest extends FormRequest
         }
 
         // Ensure background_color has # prefix
-        if ($this->has('background_color') && !str_starts_with($this->background_color, '#')) {
+        if ($this->has('background_color') && ! str_starts_with($this->background_color, '#')) {
             $this->merge([
-                'background_color' => '#' . $this->background_color,
+                'background_color' => '#'.$this->background_color,
             ]);
         }
     }

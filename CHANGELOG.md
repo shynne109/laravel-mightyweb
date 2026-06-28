@@ -15,14 +15,14 @@ This release integrates Livewire Flux v2.6, replacing all custom Blade component
 
 ### Added
 - **Livewire Flux v2.6** - Professional UI component library integration
-- **Unified Dashboard Component** - `@livewire('mightyweb.dashboard')` - All 8 modules in one tabbed interface
+- **Unified Dashboard Component** - `@livewire('mightyweb::dashboard')` - All 8 modules in one tabbed interface
 - `@fluxAppearance` directive - Automatic theme and color scheme management
 - `@fluxScripts` directive - Interactive component JavaScript
 - Flux CSS in Vite build pipeline (~185KB added for comprehensive component library)
 - Dashboard documentation (`docs/DASHBOARD.md`)
 
 ### Changed
-- **All 8 Volt Components Migrated to Flux**:
+- **All 8 SFC Components Migrated to Flux**:
   - `floating-button/index.blade.php` - Now uses Flux modals, buttons, inputs, badges, icons
   - `tab/index.blade.php` - Flux form components and file uploads
   - `navigation-icon/index.blade.php` - Flux badges and buttons
@@ -66,7 +66,7 @@ This release integrates Livewire Flux v2.6, replacing all custom Blade component
 
 ### 🎉 Initial Release
 
-MightyWeb is a comprehensive Laravel package for managing mobile app configurations with a modern, intuitive interface built using Livewire Volt and Tailwind CSS 4.
+MightyWeb is a comprehensive Laravel package for managing mobile app configurations with a modern, intuitive interface built using Livewire 4 Single File Components and Tailwind CSS 4.
 
 ### Features
 
@@ -81,7 +81,7 @@ MightyWeb is a comprehensive Laravel package for managing mobile app configurati
 - **Floating Button** - Configure floating action buttons with icons and actions
 
 #### Technical Features
-- **Livewire Volt Architecture** - Modern class-based single-file components
+- **Livewire 4 SFC Architecture** - Native single-file components
 - **Modal-based CRUD** - All create, edit, and delete operations in modals
 - **Vite Asset Compilation** - Optimized builds with automatic cache busting (82KB CSS, 48KB JS)
 - **Tailwind CSS 4** - Modern utility-first styling with custom theme
@@ -96,7 +96,7 @@ MightyWeb is a comprehensive Laravel package for managing mobile app configurati
 - **Auto-dismiss Alerts** - Success messages auto-dismiss after 3 seconds
 
 #### Developer Experience
-- **Auto-Discovery** - Volt components automatically registered
+- **Auto-Discovery** - SFC components automatically registered via namespace
 - **Blade Directives** - Simple `@mightywebAssets` and `@mightywebScripts` tags
 - **Pre-built Assets** - No build process required for end users
 - **Hot Module Replacement** - Instant updates during development with `npm run dev`
@@ -137,7 +137,7 @@ Add to your layout:
 
 ### Package Structure
 
-- **8 Volt Components** - Single-file components with modal CRUD
+- **8 SFC Components** - Single-file components with modal CRUD
 - **7 Shared Blade Components** - Reusable UI elements
 - **9 Eloquent Models** - Full type-hinted models
 - **3 Controllers** - Dashboard, JSON export, API

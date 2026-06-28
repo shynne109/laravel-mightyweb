@@ -1,5 +1,5 @@
 <?php
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use MightyWeb\Models\Menu;
@@ -11,7 +11,7 @@ new class extends Component {
     // Listing properties
     public string $search = '';
     public string $filterParent = 'all';
-    public string $sortField = 'sort_order';
+    public string $sortField = 'id';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
 
@@ -37,7 +37,6 @@ new class extends Component {
             'title' => 'required|string|max:255',
             'url' => 'required|string|max:500',
             'parent_id' => 'nullable|exists:menus,id',
-            'sort_order' => 'required|integer|min:1',
             'is_active' => 'boolean',
         ];
 
@@ -58,8 +57,6 @@ new class extends Component {
             'icon.image' => 'The file must be an image.',
             'icon.max' => 'The icon must not be larger than 2MB.',
             'parent_id.exists' => 'The selected parent menu does not exist.',
-            'sort_order.required' => 'Sort order is required.',
-            'sort_order.min' => 'Sort order must be at least 1.',
         ];
     }
 
@@ -92,7 +89,7 @@ new class extends Component {
         } else {
             $query->whereNull('parent_id');
         }
-        $maxSortOrder = $query->max('sort_order');
+        $maxSortOrder = $query->max('id');
         $this->sort_order = $maxSortOrder ? $maxSortOrder + 1 : 1;
     }
 
@@ -100,10 +97,9 @@ new class extends Component {
     {
         $this->resetForm();
         $query = Menu::whereNull('parent_id');
-        $maxSortOrder = $query->max('sort_order');
+        $maxSortOrder = $query->max('id');
         $this->sort_order = $maxSortOrder ? $maxSortOrder + 1 : 1;
-        $this->showCreateModal = true;
-        $this->dispatch('open-modal', name: 'showCreateModal');
+        $this->modal('showCreateModal')->show();
     }
 
     public function openEditModal(int $id): void
@@ -116,11 +112,9 @@ new class extends Component {
         $this->url = $menu->url;
         $this->existing_icon = $menu->icon;
         $this->parent_id = $menu->parent_id;
-        $this->sort_order = $menu->sort_order;
-        $this->is_active = $menu->is_active;
-        
-        $this->showEditModal = true;
-        $this->dispatch('open-modal', name: 'showEditModal');
+        $this->sort_order = $menu->id;
+        $this->is_active = $menu->is_active;   
+        $this->modal('showEditModal')->show();
     }
 
     public function save(): void
@@ -139,13 +133,11 @@ new class extends Component {
             'url' => $this->url,
             'icon' => $iconPath,
             'parent_id' => $this->parent_id,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Menu item created successfully!');
-        $this->showCreateModal = false;
-        $this->dispatch('close-modal', name: 'showCreateModal');
+        $this->modal('showCreateModal')->close();
         $this->resetForm();
     }
 
@@ -175,13 +167,11 @@ new class extends Component {
             'url' => $this->url,
             'icon' => $iconPath,
             'parent_id' => $this->parent_id,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Menu item updated successfully!');
-        $this->showEditModal = false;
-        $this->dispatch('close-modal', name: 'showEditModal');
+        $this->modal('showEditModal')->close();
         $this->resetForm();
     }
 
@@ -193,11 +183,9 @@ new class extends Component {
         if ($menu && $menu->children()->count() > 0) {
             session()->flash('error', 'Cannot delete menu item with sub-menus. Please delete sub-menus first.');
             return;
-        }
-        
-        $this->confirmingDelete = true;
+        } 
         $this->deleteId = $id;
-        $this->dispatch('open-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->show();
     }
 
     public function delete(): void
@@ -215,9 +203,7 @@ new class extends Component {
                 session()->flash('success', 'Menu item deleted successfully!');
             }
         }
-
-        $this->confirmingDelete = false;
-        $this->dispatch('close-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->close();
         $this->deleteId = null;
     }
 
@@ -252,11 +238,9 @@ new class extends Component {
             'icon',
             'existing_icon',
             'parent_id',
-            'sort_order',
             'is_active',
         ]);
         $this->is_active = true;
-        $this->sort_order = 1;
         $this->resetValidation();
     }
 
@@ -281,10 +265,11 @@ new class extends Component {
 
         return [
             'menus' => $query->paginate($this->perPage),
-            'parentMenus' => Menu::whereNull('parent_id')->orderBy('sort_order')->get(),
+            'parentMenus' => Menu::whereNull('parent_id')->orderBy('id')->get(),
         ];
     }
-}; ?>
+}
+?>
 
 <div class="p-6">
     <!-- Header -->
@@ -293,57 +278,58 @@ new class extends Component {
             <flux:heading size="xl">Menu Management</flux:heading>
             <flux:subheading>Manage app navigation menu items and sub-menus</flux:subheading>
         </div>
-        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
-            Add Menu Item
-        </flux:button>
+        <flux:modal.trigger name="showCreateModal">
+            <flux:button variant="primary" icon="plus">
+                Add Menu Item
+            </flux:button>
+        </flux:modal.trigger>
     </div>
 
     <!-- Search and Filter Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-            <flux:input wire:model.live.debounce.300ms="search" 
-                       placeholder="Search by title or URL..." 
-                       icon="magnifying-glass" />
+            <flux:input wire:model.live.debounce.300ms="search" placeholder="Search by title or URL..."
+                icon="magnifying-glass" />
         </div>
         <div class="flex items-center gap-4">
             <flux:select wire:model.live="filterParent" placeholder="Filter">
-                <flux:option value="all">All Items</flux:option>
-                <flux:option value="parent">Parent Menus Only</flux:option>
-                <flux:option value="child">Sub-menus Only</flux:option>
+                <flux:select.option value="all">All Items</flux:select.option>
+                <flux:select.option value="parent">Parent Menus Only</flux:select.option>
+                <flux:select.option value="child">Sub-menus Only</flux:select.option>
             </flux:select>
             <flux:select wire:model.live="perPage" placeholder="Per page">
-                <flux:option value="5">5</flux:option>
-                <flux:option value="10">10</flux:option>
-                <flux:option value="25">25</flux:option>
-                <flux:option value="50">50</flux:option>
+                <flux:select.option value="5">5</flux:select.option>
+                <flux:select.option value="10">10</flux:select.option>
+                <flux:select.option value="25">25</flux:select.option>
+                <flux:select.option value="50">50</flux:select.option>
             </flux:select>
         </div>
     </div>
 
     <!-- Success/Error Messages -->
     @if (session()->has('success'))
-        <div class="mb-6">
-            <flux:badge size="lg" color="green" variant="solid" icon="check-circle">
-                {{ session('success') }}
-            </flux:badge>
-        </div>
+    <div class="mb-6">
+        <flux:badge size="lg" color="green" variant="solid" icon="check-circle">
+            {{ session('success') }}
+        </flux:badge>
+    </div>
     @endif
 
     @if (session()->has('error'))
-        <div class="mb-6">
-            <flux:badge size="lg" color="red" variant="solid" icon="x-circle">
-                {{ session('error') }}
-            </flux:badge>
-        </div>
+    <div class="mb-6">
+        <flux:badge size="lg" color="red" variant="solid" icon="x-circle">
+            {{ session('error') }}
+        </flux:badge>
+    </div>
     @endif
-            <div class="flex items-center">
-                <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="text-red-800 dark:text-red-200">{{ session('error') }}</span>
-            </div>
-        </div>
-    @endif
+    <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"></path>
+        </svg>
+        <span class="text-red-800 dark:text-red-200">{{ session('error') }}</span>
+    </div>
 
     <!-- Menus Table -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -351,136 +337,156 @@ new class extends Component {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th wire:click="sortBy('sort_order')" 
+                        <th wire:click="sortBy('id')"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Order</span>
-                                @if ($sortField === 'sort_order')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
+                                @if ($sortField === 'id')
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if ($sortDirection === 'asc')
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7">
+                                    </path>
+                                    @else
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                    @endif
+                                </svg>
                                 @endif
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Icon
                         </th>
-                        <th wire:click="sortBy('title')" 
+                        <th wire:click="sortBy('title')"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Title & URL</span>
                                 @if ($sortField === 'title')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if ($sortDirection === 'asc')
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7">
+                                    </path>
+                                    @else
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                    @endif
+                                </svg>
                                 @endif
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Parent/Children
                         </th>
-                        <th wire:click="sortBy('is_active')" 
+                        <th wire:click="sortBy('is_active')"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Status</span>
                                 @if ($sortField === 'is_active')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if ($sortDirection === 'asc')
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7">
+                                    </path>
+                                    @else
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                    @endif
+                                </svg>
                                 @endif
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th
+                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Actions
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse ($menus as $menu)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                    {{ $menu->sort_order }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($menu->icon)
-                                    <img src="{{ asset('storage/' . $menu->icon) }}" 
-                                         alt="{{ $menu->title }}" 
-                                         class="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-600">
-                                @else
-                                    <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                                        </svg>
-                                    </div>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span
+                                class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
+                                {{ $menu->id }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if ($menu->icon)
+                            <img src="{{ asset('storage/' . $menu->icon) }}" alt="{{ $menu->title }}"
+                                class="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-600">
+                            @else
+                            <div
+                                class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                            </div>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                @if ($menu->parent_id)
+                                <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7">
+                                    </path>
+                                </svg>
                                 @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    @if ($menu->parent_id)
-                                        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    @endif
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $menu->title }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400 font-mono truncate max-w-xs">{{ $menu->url }}</div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $menu->title }}
                                     </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 font-mono truncate max-w-xs">{{
+                                        $menu->url }}</div>
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @if ($menu->parent)
-                                    <span class="text-gray-600 dark:text-gray-400">
-                                        Parent: <span class="font-medium">{{ $menu->parent->title }}</span>
-                                    </span>
-                                @elseif ($menu->children->count() > 0)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                                        {{ $menu->children->count() }} sub-menu{{ $menu->children->count() > 1 ? 's' : '' }}
-                                    </span>
-                                @else
-                                    <span class="text-gray-400 dark:text-gray-500">—</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <flux:badge 
-                                    wire:click="toggleActive({{ $menu->id }})" 
-                                    size="sm" 
-                                    :color="$menu->is_active ? 'green' : 'gray'"
-                                    class="cursor-pointer">
-                                    {{ $menu->is_active ? 'Active' : 'Inactive' }}
-                                </flux:badge>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end space-x-2">
-                                    <flux:button icon="pencil" size="sm" variant="ghost" wire:click="openEditModal({{ $menu->id }})" />
-                                    <flux:button icon="trash" size="sm" variant="ghost" color="red" wire:click="confirmDelete({{ $menu->id }})" />
-                                </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            @if ($menu->parent)
+                            <span class="text-gray-600 dark:text-gray-400">
+                                Parent: <span class="font-medium">{{ $menu->parent->title }}</span>
+                            </span>
+                            @elseif ($menu->children->count() > 0)
+                            <span
+                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">
+                                {{ $menu->children->count() }} sub-menu{{ $menu->children->count() > 1 ? 's' : '' }}
+                            </span>
+                            @else
+                            <span class="text-gray-400 dark:text-gray-500">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <flux:badge wire:click="toggleActive({{ $menu->id }})" size="sm"
+                                :color="$menu->is_active ? 'green' : 'gray'" class="cursor-pointer">
+                                {{ $menu->is_active ? 'Active' : 'Inactive' }}
+                            </flux:badge>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-2">
+                                <flux:button icon="pencil" size="sm" variant="ghost"
+                                    wire:click="openEditModal({{ $menu->id }})" />
+                                <flux:button icon="trash" size="sm" variant="ghost" color="red"
+                                    wire:click="confirmDelete({{ $menu->id }})" />
+                            </div>
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <flux:icon.bars-3 class="w-16 h-16 mx-auto text-zinc-400 mb-4" />
-                                <flux:heading size="lg" class="mb-2">No menu items found</flux:heading>
-                                <flux:text class="mb-6">Get started by creating your first menu item.</flux:text>
-                                <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
-                                    Add Menu Item
-                                </flux:button>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <flux:icon.bars-3 class="w-16 h-16 mx-auto text-zinc-400 mb-4" />
+                            <flux:heading size="lg" class="mb-2">No menu items found</flux:heading>
+                            <flux:text class="mb-6">Get started by creating your first menu item.</flux:text>
+                            <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
+                                Add Menu Item
+                            </flux:button>
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -488,14 +494,14 @@ new class extends Component {
 
         <!-- Pagination -->
         @if ($menus->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $menus->links() }}
-            </div>
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            {{ $menus->links() }}
+        </div>
         @endif
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <flux:modal name="confirmingDelete" class="md:w-96">
+    <flux:modal variant="flyout" name="confirmingDelete" class="md:w-96">
         <form wire:submit="delete" class="space-y-6">
             <div>
                 <flux:heading size="lg">Delete Menu Item</flux:heading>
@@ -512,57 +518,36 @@ new class extends Component {
     </flux:modal>
 
     <!-- Create Menu Modal -->
-    <flux:modal name="showCreateModal" class="md:w-[600px]">
+    <flux:modal variant="flyout" name="showCreateModal" class="md:w-[600px]">
         <form wire:submit="save" class="space-y-6">
             <div>
                 <flux:heading size="lg">Create Menu Item</flux:heading>
             </div>
 
-            <flux:input 
-                wire:model.defer="title" 
-                label="Menu Title" 
-                name="title" 
-                placeholder="Enter menu title" />
+            <flux:input wire:model.defer="title" label="Menu Title" name="title" placeholder="Enter menu title" />
 
-            <flux:input 
-                wire:model.defer="url" 
-                label="URL" 
-                name="url" 
-                placeholder="https://example.com or /page" 
+            <flux:input wire:model.defer="url" label="URL" name="url" placeholder="https://example.com or /page"
                 description="The destination URL for this menu item" />
 
-            <x-form.file-upload 
-                wire:model="icon" 
-                label="Menu Icon (Optional)" 
-                name="icon" 
-                accept="image/*" 
-                help="Upload an icon for the menu item (max 2MB)" />
+            <flux:input type="file" wire:model="icon" label="Menu Icon (Optional)" name="icon" accept="image/*"
+                description="Upload an icon for the menu item (max 2MB)" />
 
-            <flux:select 
-                wire:model="parent_id" 
-                label="Parent Menu" 
-                name="parent_id" 
-                variant="listbox">
-                <flux:option value="">None (Top Level)</flux:option>
+            <flux:select wire:model="parent_id" label="Parent Menu" name="parent_id" variant="listbox">
+                <flux:select.option value="">None (Top Level)</flux:select.option>
                 @foreach($parentMenus as $parent)
-                    <flux:option value="{{ $parent->id }}">{{ $parent->title }}</flux:option>
+                <flux:select.option value="{{ $parent->id }}">{{ $parent->title }}</flux:select.option>
                 @endforeach
             </flux:select>
 
             <div class="grid grid-cols-2 gap-4">
-                <flux:input 
-                    wire:model.defer="sort_order" 
-                    label="Sort Order" 
-                    name="sort_order" 
-                    type="number" 
-                    min="1" />
+                <flux:input wire:model.defer="sort_order" label="Sort Order" name="sort_order" type="number" min="1" />
 
                 <div class="flex items-center pt-6">
                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" 
-                               wire:model.defer="is_active" 
-                               class="sr-only peer">
-                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <input type="checkbox" wire:model.defer="is_active" class="sr-only peer">
+                        <div
+                            class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600">
+                        </div>
                         <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
                     </label>
                 </div>
@@ -582,53 +567,42 @@ new class extends Component {
                 <flux:heading size="lg">Edit Menu Item</flux:heading>
             </div>
 
-            <flux:input 
-                wire:model.defer="title" 
-                label="Menu Title" 
-                name="title" 
-                placeholder="Enter menu title" />
+            <flux:input wire:model.defer="title" label="Menu Title" name="title" placeholder="Enter menu title" />
 
-            <flux:input 
-                wire:model.defer="url" 
-                label="URL" 
-                name="url" 
-                placeholder="https://example.com or /page" 
+            <flux:input wire:model.defer="url" label="URL" name="url" placeholder="https://example.com or /page"
                 description="The destination URL for this menu item" />
 
-            <x-form.file-upload 
-                wire:model="icon" 
-                label="Menu Icon (Optional)" 
-                name="icon" 
-                :current-file="$existing_icon" 
-                accept="image/*" 
-                help="Upload a new icon to replace the current one (max 2MB)"
-                wire:remove="removeExistingIcon" />
+            <div>
+                <flux:input type="file" wire:model="icon" label="Menu Icon (Optional)" name="icon" accept="image/*"
+                    description="Upload a new icon to replace the current one (max 2MB)" />
 
-            <flux:select 
-                wire:model="parent_id" 
-                label="Parent Menu" 
-                name="parent_id" 
-                variant="listbox">
-                <flux:option value="">None (Top Level)</flux:option>
+                @if ($existing_icon)
+                <div class="mt-2 flex items-center gap-2">
+                    <img src="{{ asset('storage/' . $existing_icon) }}" alt="Current icon"
+                        class="w-10 h-10 rounded object-cover border border-gray-200 dark:border-gray-600">
+                    <flux:button size="sm" variant="ghost" color="red" wire:click="removeExistingIcon" type="button">
+                        Remove
+                    </flux:button>
+                </div>
+                @endif
+            </div>
+
+            <flux:select wire:model="parent_id" label="Parent Menu" name="parent_id" variant="listbox">
+                <flux:select.option value="">None (Top Level)</flux:select.option>
                 @foreach($parentMenus->where('id', '!=', $editingId) as $parent)
-                    <flux:option value="{{ $parent->id }}">{{ $parent->title }}</flux:option>
+                <flux:select.option value="{{ $parent->id }}">{{ $parent->title }}</flux:select.option>
                 @endforeach
             </flux:select>
 
             <div class="grid grid-cols-2 gap-4">
-                <flux:input 
-                    wire:model.defer="sort_order" 
-                    label="Sort Order" 
-                    name="sort_order" 
-                    type="number" 
-                    min="1" />
+                <flux:input wire:model.defer="sort_order" label="Sort Order" name="sort_order" type="number" min="1" />
 
                 <div class="flex items-center pt-6">
                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" 
-                               wire:model.defer="is_active" 
-                               class="sr-only peer">
-                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                        <input type="checkbox" wire:model.defer="is_active" class="sr-only peer">
+                        <div
+                            class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600">
+                        </div>
                         <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
                     </label>
                 </div>
@@ -644,12 +618,14 @@ new class extends Component {
     <!-- Loading Overlay -->
     <div wire:loading class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
-            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
             </svg>
             <span class="text-gray-700 dark:text-gray-300">Processing...</span>
         </div>
     </div>
 </div>
-

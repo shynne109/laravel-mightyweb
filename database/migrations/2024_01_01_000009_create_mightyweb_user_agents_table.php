@@ -26,7 +26,7 @@ return new class extends Migration
             $table->text('ios')->nullable();
             $table->boolean('status')->default(false);
             $table->timestamps();
-            
+
             $table->index('status');
         });
     }

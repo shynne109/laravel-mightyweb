@@ -30,6 +30,8 @@ return [
     |
     */
 
+    'layout' => env('MIGHTYWEB_LAYOUT', 'mightyweb::layouts.app'),
+
     'route' => [
         'prefix' => env('MIGHTYWEB_ROUTE_PREFIX', 'mightyweb'),
         'middleware' => ['web', 'auth'],
@@ -63,6 +65,7 @@ return [
     'storage' => [
         'disk' => env('MIGHTYWEB_STORAGE_DISK', 'public'),
         'path' => env('MIGHTYWEB_STORAGE_PATH', 'mightyweb'),
+        'visibility' => env('MIGHTYWEB_STORAGE_VISIBILITY', 'public'),
     ],
 
     /*

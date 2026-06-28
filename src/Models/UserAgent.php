@@ -36,8 +36,6 @@ class UserAgent extends Model
 
     /**
      * Get the database connection for the model.
-     *
-     * @return string|null
      */
     public function getConnectionName(): ?string
     {
@@ -54,8 +52,6 @@ class UserAgent extends Model
 
     /**
      * Get the active user agent configuration.
-     *
-     * @return UserAgent|null
      */
     public static function getActive(): ?UserAgent
     {

@@ -7,8 +7,11 @@ use Illuminate\Contracts\Validation\Rule;
 class ImageDimensionsRule implements Rule
 {
     protected $minWidth;
+
     protected $minHeight;
+
     protected $maxWidth;
+
     protected $maxHeight;
 
     public function __construct($minWidth = null, $minHeight = null, $maxWidth = null, $maxHeight = null)
@@ -28,13 +31,13 @@ class ImageDimensionsRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (!$value || !$value->isValid()) {
+        if (! $value || ! $value->isValid()) {
             return false;
         }
 
         $dimensions = getimagesize($value->getRealPath());
-        
-        if (!$dimensions) {
+
+        if (! $dimensions) {
             return false;
         }
 

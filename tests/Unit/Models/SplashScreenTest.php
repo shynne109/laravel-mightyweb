@@ -2,9 +2,9 @@
 
 namespace MightyWeb\Tests\Unit\Models;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use MightyWeb\Models\SplashScreen;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class SplashScreenTest extends TestCase
 {

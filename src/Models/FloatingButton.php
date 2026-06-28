@@ -39,8 +39,6 @@ class FloatingButton extends Model
 
     /**
      * Get the database connection for the model.
-     *
-     * @return string|null
      */
     public function getConnectionName(): ?string
     {
@@ -65,37 +63,33 @@ class FloatingButton extends Model
 
     /**
      * Get the full URL for the button image.
-     *
-     * @return string|null
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return null;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
 
-        return Storage::disk($disk)->url($path . '/floatingbutton/' . $this->image);
+        return Storage::disk($disk)->url($path.'/floatingbutton/'.$this->image);
     }
 
     /**
      * Delete the button image from storage.
-     *
-     * @return bool
      */
     public function deleteImage(): bool
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return false;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $path . '/floatingbutton/' . $this->image;
+        $fullPath = $path.'/floatingbutton/'.$this->image;
 
-        return Storage::disk($disk)->exists($fullPath) 
+        return Storage::disk($disk)->exists($fullPath)
             ? Storage::disk($disk)->delete($fullPath)
             : false;
     }

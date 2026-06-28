@@ -2,11 +2,11 @@
 
 namespace MightyWeb\Tests\Unit\Services;
 
-use MightyWeb\Services\FileUploadService;
-use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use MightyWeb\Services\FileUploadService;
+use Tests\TestCase;
 
 class FileUploadServiceTest extends TestCase
 {
@@ -18,14 +18,14 @@ class FileUploadServiceTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        $this->service = new FileUploadService();
+        $this->service = new FileUploadService;
     }
 
     /** @test */
     public function it_can_upload_a_file()
     {
         $file = UploadedFile::fake()->image('test.jpg');
-        
+
         $path = $this->service->uploadFile($file, 'test-directory');
 
         $this->assertNotNull($path);
@@ -93,7 +93,7 @@ class FileUploadServiceTest extends TestCase
     public function it_creates_directory_if_not_exists()
     {
         $file = UploadedFile::fake()->image('test.jpg');
-        
+
         $path = $this->service->uploadFile($file, 'new-test-directory/subdirectory');
 
         $this->assertNotNull($path);

@@ -2,14 +2,14 @@
 
 namespace MightyWeb\Http\Livewire;
 
+use Illuminate\View\View;
 use Livewire\Component;
 
 /**
  * Dashboard Component
- * 
+ *
  * Unified dashboard providing access to all 8 MightyWeb modules in a tabbed interface.
- * 
- * @package MightyWeb
+ *
  * @version 1.1.0
  */
 class Dashboard extends Component
@@ -22,8 +22,7 @@ class Dashboard extends Component
     /**
      * Switch to a different tab.
      *
-     * @param string $tab The tab identifier to switch to
-     * @return void
+     * @param  string  $tab  The tab identifier to switch to
      */
     public function switchTab(string $tab): void
     {
@@ -33,7 +32,7 @@ class Dashboard extends Component
     /**
      * Render the component.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function render()
     {

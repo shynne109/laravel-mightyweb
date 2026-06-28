@@ -17,8 +17,6 @@ class ConfigController extends Controller
 
     /**
      * Create a new controller instance.
-     *
-     * @param JsonExportService $jsonExportService
      */
     public function __construct(JsonExportService $jsonExportService)
     {
@@ -27,14 +25,12 @@ class ConfigController extends Controller
 
     /**
      * Get full app configuration.
-     *
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config,
@@ -50,14 +46,12 @@ class ConfigController extends Controller
 
     /**
      * Get app settings only.
-     *
-     * @return JsonResponse
      */
     public function appSettings(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['app_settings'] ?? [],
@@ -73,14 +67,12 @@ class ConfigController extends Controller
 
     /**
      * Get walkthrough screens.
-     *
-     * @return JsonResponse
      */
     public function walkthrough(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['walkthrough'] ?? [],
@@ -96,14 +88,12 @@ class ConfigController extends Controller
 
     /**
      * Get menu items.
-     *
-     * @return JsonResponse
      */
     public function menu(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['menu'] ?? [],
@@ -119,14 +109,12 @@ class ConfigController extends Controller
 
     /**
      * Get tabs.
-     *
-     * @return JsonResponse
      */
     public function tabs(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['tabs'] ?? [],
@@ -142,14 +130,12 @@ class ConfigController extends Controller
 
     /**
      * Get pages.
-     *
-     * @return JsonResponse
      */
     public function pages(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['pages'] ?? [],
@@ -165,14 +151,12 @@ class ConfigController extends Controller
 
     /**
      * Get theme configuration.
-     *
-     * @return JsonResponse
      */
     public function theme(): JsonResponse
     {
         try {
             $config = $this->jsonExportService->generateConfig();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $config['theme'] ?? [],
@@ -186,4 +170,3 @@ class ConfigController extends Controller
         }
     }
 }
-

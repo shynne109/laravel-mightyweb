@@ -1,5 +1,5 @@
 <?php
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use MightyWeb\Models\Page;
@@ -10,7 +10,7 @@ new class extends Component {
 
     // Listing properties
     public string $search = '';
-    public string $sortField = 'sort_order';
+    public string $sortField = 'id';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
 
@@ -27,7 +27,7 @@ new class extends Component {
     public string $url = '';
     public $icon = null;
     public ?string $existing_icon = null;
-    public int $sort_order = 1;
+    public int $id = 1;
     public bool $is_active = true;
 
     protected function rules(): array
@@ -36,7 +36,6 @@ new class extends Component {
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'url' => 'required|string|max:500',
-            'sort_order' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ];
 
@@ -59,9 +58,6 @@ new class extends Component {
             'url.max' => 'Page URL cannot exceed 500 characters.',
             'icon.image' => 'The file must be an image.',
             'icon.max' => 'The image size cannot exceed 2MB.',
-            'sort_order.required' => 'Sort order is required.',
-            'sort_order.integer' => 'Sort order must be a number.',
-            'sort_order.min' => 'Sort order cannot be negative.',
         ];
     }
 
@@ -83,10 +79,9 @@ new class extends Component {
     public function openCreateModal(): void
     {
         $this->resetForm();
-        $maxOrder = Page::max('sort_order');
-        $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
-        $this->showCreateModal = true;
-        $this->dispatch('open-modal', name: 'showCreateModal');
+        $maxOrder = Page::max('id');
+        $this->id = $maxOrder ? $maxOrder + 1 : 1;
+        $this->modal('showCreateModal')->show();
     }
 
     public function openEditModal(int $id): void
@@ -99,11 +94,11 @@ new class extends Component {
         $this->description = $page->description ?? '';
         $this->url = $page->url;
         $this->existing_icon = $page->icon;
-        $this->sort_order = $page->sort_order;
+        $this->id = $page->id;
         $this->is_active = $page->is_active;
         
         $this->showEditModal = true;
-        $this->dispatch('open-modal', name: 'showEditModal');
+        $this->modal('showEditModal')->show();
     }
 
     public function save(): void
@@ -122,20 +117,17 @@ new class extends Component {
             'description' => $this->description,
             'url' => $this->url,
             'icon' => $iconPath,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Page created successfully!');
-        $this->showCreateModal = false;
-        $this->dispatch('close-modal', name: 'showCreateModal');
+        $this->modal('showCreateModal')->close();
         $this->resetForm();
     }
 
     public function update(): void
     {
         $this->validate();
-
         $page = Page::findOrFail($this->editingId);
         $fileService = app(FileUploadService::class);
         $iconPath = $this->existing_icon;
@@ -152,13 +144,12 @@ new class extends Component {
             'description' => $this->description,
             'url' => $this->url,
             'icon' => $iconPath,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Page updated successfully!');
         $this->showEditModal = false;
-        $this->dispatch('close-modal', name: 'showEditModal');
+        $this->modal('showEditModal')->close();
         $this->resetForm();
     }
 
@@ -166,7 +157,7 @@ new class extends Component {
     {
         $this->confirmingDelete = true;
         $this->deleteId = $id;
-        $this->dispatch('open-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->show();
     }
 
     public function delete(): void
@@ -186,7 +177,7 @@ new class extends Component {
         }
 
         $this->confirmingDelete = false;
-        $this->dispatch('close-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->close();
         $this->deleteId = null;
     }
 
@@ -221,11 +212,11 @@ new class extends Component {
             'url',
             'icon',
             'existing_icon',
-            'sort_order',
+            'id',
             'is_active',
         ]);
         $this->is_active = true;
-        $this->sort_order = 1;
+        $this->id = 1;
         $this->resetValidation();
     }
 
@@ -266,10 +257,10 @@ new class extends Component {
         </div>
         <div class="flex items-center gap-2">
             <flux:select wire:model="perPage" variant="listbox">
-                <flux:option value="5">5 per page</flux:option>
-                <flux:option value="10">10 per page</flux:option>
-                <flux:option value="25">25 per page</flux:option>
-                <flux:option value="50">50 per page</flux:option>
+                <flux:select.option value="5">5 per page</flux:select.option>
+                <flux:select.option value="10">10 per page</flux:select.option>
+                <flux:select.option value="25">25 per page</flux:select.option>
+                <flux:select.option value="50">50 per page</flux:select.option>
             </flux:select>
         </div>
     </div>
@@ -295,11 +286,11 @@ new class extends Component {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th wire:click="sortBy('sort_order')" 
+                        <th wire:click="sortBy('id')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Order</span>
-                                @if ($sortField === 'sort_order')
+                                @if ($sortField === 'id')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -353,7 +344,7 @@ new class extends Component {
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                    {{ $page->sort_order }}
+                                    {{ $page->id }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -436,7 +427,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Create Page Modal -->
-    <flux:modal name="showCreateModal" class="md:w-[600px]">
+    <flux:modal variant="flyout" name="showCreateModal" class="md:w-[600px]">
         <form wire:submit="save" class="space-y-6">
             <div>
                 <flux:heading size="lg">Create Page</flux:heading>
@@ -448,7 +439,7 @@ new class extends Component {
                 name="title" 
                 placeholder="Enter page title" />
 
-            <x-form.textarea 
+            <flux:textarea 
                 wire:model.defer="description" 
                 label="Description (Optional)" 
                 name="description" 
@@ -461,19 +452,21 @@ new class extends Component {
                 name="url" 
                 placeholder="https://example.com or /page" 
                 description="The destination URL for this page" />
-
-            <x-form.file-upload 
+            
+            <flux:input 
+                type="file" 
                 wire:model="icon" 
                 label="Page Icon (Optional)" 
                 name="icon" 
                 accept="image/*" 
-                help="Upload an icon for the page (max 2MB)" />
+                description="Upload an icon for the page (max 2MB)" />
+
 
             <div class="grid grid-cols-2 gap-4">
                 <flux:input 
-                    wire:model.defer="sort_order" 
+                    wire:model.defer="id" 
                     label="Sort Order" 
-                    name="sort_order" 
+                    name="id" 
                     type="number" 
                     min="0" />
 
@@ -496,7 +489,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Edit Page Modal -->
-    <flux:modal name="showEditModal" class="md:w-[600px]">
+    <flux:modal variant="flyout" name="showEditModal" class="md:w-[600px]">
         <form wire:submit="update" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Page</flux:heading>
@@ -508,7 +501,7 @@ new class extends Component {
                 name="title" 
                 placeholder="Enter page title" />
 
-            <x-form.textarea 
+            <flux:textarea 
                 wire:model.defer="description" 
                 label="Description (Optional)" 
                 name="description" 
@@ -521,21 +514,20 @@ new class extends Component {
                 name="url" 
                 placeholder="https://example.com or /page" 
                 description="The destination URL for this page" />
-
-            <x-form.file-upload 
+            <flux:input 
+                type="file" 
                 wire:model="icon" 
                 label="Page Icon (Optional)" 
                 name="icon" 
-                :current-file="$existing_icon" 
                 accept="image/*" 
-                help="Upload a new icon to replace the current one (max 2MB)"
-                wire:remove="removeExistingIcon" />
+                description="Upload an icon for the page (max 2MB)" />
+                
 
             <div class="grid grid-cols-2 gap-4">
                 <flux:input 
-                    wire:model.defer="sort_order" 
+                    wire:model.defer="id" 
                     label="Sort Order" 
-                    name="sort_order" 
+                    name="id" 
                     type="number" 
                     min="0" />
 

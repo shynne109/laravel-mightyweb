@@ -27,7 +27,7 @@ return new class extends Migration
             $table->boolean('status')->default(true);
             $table->integer('order')->default(0);
             $table->timestamps();
-            
+
             $table->index('status');
             $table->index('order');
         });

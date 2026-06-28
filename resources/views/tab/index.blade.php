@@ -1,5 +1,5 @@
 <?php
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use MightyWeb\Models\Tab;
@@ -10,7 +10,7 @@ new class extends Component {
 
     // Listing properties
     public string $search = '';
-    public string $sortField = 'sort_order';
+    public string $sortField = 'id';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
 
@@ -26,7 +26,7 @@ new class extends Component {
     public string $url = '';
     public $icon = null;
     public ?string $existing_icon = null;
-    public int $sort_order = 1;
+    public int $id = 1;
     public bool $is_active = true;
 
     protected function rules(): array
@@ -34,7 +34,6 @@ new class extends Component {
         $rules = [
             'title' => 'required|string|max:255',
             'url' => 'required|string|max:500',
-            'sort_order' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ];
 
@@ -57,9 +56,6 @@ new class extends Component {
             'icon.required' => 'Tab icon is required.',
             'icon.image' => 'The file must be an image.',
             'icon.max' => 'The image size cannot exceed 2MB.',
-            'sort_order.required' => 'Sort order is required.',
-            'sort_order.integer' => 'Sort order must be a number.',
-            'sort_order.min' => 'Sort order cannot be negative.',
         ];
     }
 
@@ -81,10 +77,9 @@ new class extends Component {
     public function openCreateModal(): void
     {
         $this->resetForm();
-        $maxOrder = Tab::max('sort_order');
-        $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
-        $this->showCreateModal = true;
-        $this->dispatch('open-modal', name: 'showCreateModal');
+        $maxOrder = Tab::max('id');
+        $this->id = $maxOrder ? $maxOrder + 1 : 1;
+        $this->modal('showCreateModal')->show();
     }
 
     public function openEditModal(int $id): void
@@ -96,11 +91,10 @@ new class extends Component {
         $this->title = $tab->title;
         $this->url = $tab->url;
         $this->existing_icon = $tab->icon;
-        $this->sort_order = $tab->sort_order;
-        $this->is_active = $tab->is_active;
-        
+        $this->id = $tab->id;
+        $this->is_active = $tab->is_active;        
         $this->showEditModal = true;
-        $this->dispatch('open-modal', name: 'showEditModal');
+        $this->modal('showEditModal')->show();
     }
 
     public function save(): void
@@ -118,13 +112,11 @@ new class extends Component {
             'title' => $this->title,
             'url' => $this->url,
             'icon' => $iconPath,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Tab created successfully!');
-        $this->showCreateModal = false;
-        $this->dispatch('close-modal', name: 'showCreateModal');
+        $this->modal('showCreateModal')->close();
         $this->resetForm();
     }
 
@@ -147,13 +139,12 @@ new class extends Component {
             'title' => $this->title,
             'url' => $this->url,
             'icon' => $iconPath,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
         session()->flash('success', 'Tab updated successfully!');
         $this->showEditModal = false;
-        $this->dispatch('close-modal', name: 'showEditModal');
+        $this->modal('showEditModal')->close();
         $this->resetForm();
     }
 
@@ -161,7 +152,7 @@ new class extends Component {
     {
         $this->confirmingDelete = true;
         $this->deleteId = $id;
-        $this->dispatch('open-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->show();
     }
 
     public function delete(): void
@@ -181,7 +172,7 @@ new class extends Component {
         }
 
         $this->confirmingDelete = false;
-        $this->dispatch('close-modal', name: 'confirmingDelete');
+        $this->modal('confirmingDelete')->close();
         $this->deleteId = null;
     }
 
@@ -215,11 +206,11 @@ new class extends Component {
             'url',
             'icon',
             'existing_icon',
-            'sort_order',
+            'id',
             'is_active',
         ]);
         $this->is_active = true;
-        $this->sort_order = 1;
+        $this->id = 1;
         $this->resetValidation();
     }
 
@@ -244,9 +235,11 @@ new class extends Component {
             <flux:heading size="xl">Bottom Tabs</flux:heading>
             <flux:subheading>Manage your app's bottom navigation tabs</flux:subheading>
         </div>
-        <flux:button variant="primary" wire:click="openCreateModal" icon="plus">
-            Add New Tab
-        </flux:button>
+        <flux:modal.trigger name="showCreateModal">
+            <flux:button variant="primary" icon="plus">
+                Add New Tab
+            </flux:button>
+        </flux:modal.trigger>
     </div>
 
     <!-- Search and Filter Bar -->
@@ -259,10 +252,10 @@ new class extends Component {
         </div>
         <div class="flex items-center gap-2">
             <flux:select wire:model="perPage" variant="listbox">
-                <flux:option value="5">5 per page</flux:option>
-                <flux:option value="10">10 per page</flux:option>
-                <flux:option value="25">25 per page</flux:option>
-                <flux:option value="50">50 per page</flux:option>
+                <flux:select.option value="5">5 per page</flux:select.option>
+                <flux:select.option value="10">10 per page</flux:select.option>
+                <flux:select.option value="25">25 per page</flux:select.option>
+                <flux:select.option value="50">50 per page</flux:select.option>
             </flux:select>
         </div>
     </div>
@@ -272,12 +265,11 @@ new class extends Component {
         <flux:badge color="green" size="lg" class="mb-6" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
             {{ session('success') }}
         </flux:badge>
-    @endif
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="text-green-800 dark:text-green-200">{{ session('success') }}</span>
-            </div>
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-green-800 dark:text-green-200">{{ session('success') }}</span>
         </div>
     @endif
 
@@ -287,11 +279,11 @@ new class extends Component {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th wire:click="sortBy('sort_order')" 
+                        <th wire:click="sortBy('id')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                             <div class="flex items-center space-x-1">
                                 <span>Order</span>
-                                @if ($sortField === 'sort_order')
+                                @if ($sortField === 'id')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -345,7 +337,7 @@ new class extends Component {
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                    {{ $tab->sort_order }}
+                                    {{ $tab->id }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -406,7 +398,7 @@ new class extends Component {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <flux:modal name="confirmingDelete" class="md:w-96">
+    <flux:modal  name="confirmingDelete" class="md:w-96">
         <form wire:submit="delete" class="space-y-6">
             <div>
                 <flux:heading size="lg">Delete Tab</flux:heading>
@@ -423,7 +415,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Create Tab Modal -->
-    <flux:modal name="showCreateModal" class="md:w-[600px]">
+    <flux:modal variant="flyout" name="showCreateModal" class="md:w-[600px]">
         <form wire:submit="save" class="space-y-6">
             <div>
                 <flux:heading size="lg">Create New Tab</flux:heading>
@@ -441,20 +433,22 @@ new class extends Component {
                 name="url" 
                 placeholder="https://example.com" 
                 description="The URL or deep link for this tab" />
-
-            <x-form.file-upload 
+            <flux:input 
+                type="file" 
                 wire:model="icon" 
                 label="Tab Icon" 
                 name="icon" 
-                required 
                 accept="image/*" 
-                help="Upload an icon for the tab (max 2MB)" />
+                required
+                description="Upload an icon for the tab (max 2MB)" />
+
+            
 
             <div class="grid grid-cols-2 gap-4">
                 <flux:input 
-                    wire:model.defer="sort_order" 
+                    wire:model.defer="id" 
                     label="Sort Order" 
-                    name="sort_order" 
+                    name="id" 
                     type="number" 
                     min="0" />
 
@@ -477,7 +471,7 @@ new class extends Component {
     </flux:modal>
 
     <!-- Edit Tab Modal -->
-    <flux:modal name="showEditModal" class="md:w-[600px]">
+    <flux:modal variant="flyout" name="showEditModal" class="md:w-[600px]">
         <form wire:submit="update" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Tab</flux:heading>
@@ -495,21 +489,20 @@ new class extends Component {
                 name="url" 
                 placeholder="https://example.com" 
                 description="The URL or deep link for this tab" />
-
-            <x-form.file-upload 
+            <flux:input 
+                type="file" 
                 wire:model="icon" 
-                label="Tab Icon" 
+                label="Page Icon (Optional)" 
                 name="icon" 
-                :current-file="$existing_icon" 
                 accept="image/*" 
-                help="Upload a new icon to replace the current one (max 2MB)"
-                wire:remove="removeExistingIcon" />
+                description="Upload an icon for the page (max 2MB)" />
+            
 
             <div class="grid grid-cols-2 gap-4">
                 <flux:input 
-                    wire:model.defer="sort_order" 
+                    wire:model.defer="id" 
                     label="Sort Order" 
-                    name="sort_order" 
+                    name="id" 
                     type="number" 
                     min="0" />
 

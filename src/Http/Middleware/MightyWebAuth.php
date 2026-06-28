@@ -12,12 +12,12 @@ class MightyWebAuth
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // Check if user is authenticated
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             // Redirect to login page
             return redirect()->route('login')->with('error', 'Please login to access MightyWeb admin panel.');
         }

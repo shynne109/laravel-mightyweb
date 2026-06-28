@@ -11,10 +11,10 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Run migrations
         $this->artisan('migrate');
-        
+
         // Any additional test setup
     }
 }

@@ -3,7 +3,6 @@
 namespace MightyWeb\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
 class AppSetting extends Model
 {
@@ -35,8 +34,6 @@ class AppSetting extends Model
 
     /**
      * Get the database connection for the model.
-     *
-     * @return string|null
      */
     public function getConnectionName(): ?string
     {
@@ -46,23 +43,20 @@ class AppSetting extends Model
     /**
      * Get a setting value by key.
      *
-     * @param string $key
-     * @param mixed $default
+     * @param  mixed  $default
      * @return mixed
      */
     public static function get(string $key, $default = null)
     {
         $setting = static::where('key', $key)->first();
-        
+
         return $setting ? $setting->value : $default;
     }
 
     /**
      * Set a setting value by key.
      *
-     * @param string $key
-     * @param mixed $value
-     * @return bool
+     * @param  mixed  $value
      */
     public static function set(string $key, $value): bool
     {
@@ -74,8 +68,6 @@ class AppSetting extends Model
 
     /**
      * Get all settings as key-value pairs.
-     *
-     * @return array
      */
     public static function getAllSettings(): array
     {

@@ -48,7 +48,7 @@
                         Fast
                     </span>
                     <span class="flex items-center">
-                        <i class="ri-smartphone-line text-sm mr-1 text-blue-500"></i>
+                        <i class="ri-smartphone-line text-sm mr-1 text-primary-500"></i>
                         Mobile Ready
                     </span>
                 </div>

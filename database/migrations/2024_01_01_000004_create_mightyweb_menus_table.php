@@ -29,7 +29,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id')->default(0);
             $table->integer('order')->default(0);
             $table->timestamps();
-            
+
             $table->index('status');
             $table->index('parent_id');
             $table->index('order');

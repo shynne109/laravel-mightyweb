@@ -14,7 +14,7 @@ This is the simplest and most common way to use the dashboard component.
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-2xl font-bold mb-6">App Configuration</h1>
         
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 @endsection
 ```
@@ -36,14 +36,14 @@ Then create `resources/views/admin/mightyweb.blade.php`:
 @extends('layouts.app')
 
 @section('content')
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @endsection
 ```
 
 ## Method 2: Using Livewire Component Tag
 
 ```blade
-<livewire:mightyweb.dashboard />
+<livewire:mightyweb::dashboard />
 ```
 
 ## Method 3: Rendering Directly in Controller
@@ -81,7 +81,7 @@ Then use it:
 
 ```blade
 <x-admin-layout>
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </x-admin-layout>
 ```
 
@@ -96,8 +96,8 @@ Route::middleware(['auth'])->group(function () {
             abort(403, 'Unauthorized access');
         }
         
-        return view('mightyweb.dashboard-page');
-    })->name('mightyweb.dashboard');
+        return view('mightyweb::index-page');
+    })->name('mightyweb::index');
 });
 ```
 
@@ -145,7 +145,7 @@ Create `resources/views/admin/app-config.blade.php`:
 </head>
 <body class="antialiased">
     
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
     
     {{-- MightyWeb Scripts (includes Flux) --}}
     @mightywebScripts
@@ -157,14 +157,14 @@ Create `resources/views/admin/app-config.blade.php`:
 
 ## Important Notes
 
-1. **Component Registration**: The dashboard component is automatically registered by the package service provider as `mightyweb.dashboard`
+1. **Component Registration**: The dashboard component is automatically registered by the package service provider as `mightyweb::index`
 
 2. **Assets Required**: Make sure you have included:
    - `@mightywebAssets` in your `<head>`
    - `@mightywebScripts` before `</body>`
    - `@livewireStyles` and `@livewireScripts`
 
-3. **Namespace**: The component is registered as `mightyweb.dashboard`, which maps to the class `MightyWeb\Http\Livewire\Dashboard`
+3. **Namespace**: The component is registered as `mightyweb::index`, which maps to the SFC view at `resources/views/index.blade.php`
 
 4. **No Publishing Required**: The component works out of the box, no need to publish unless you want to customize
 

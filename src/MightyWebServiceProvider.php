@@ -2,28 +2,26 @@
 
 namespace MightyWeb;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
-use Livewire\Volt\Volt;
 
 /**
  * MightyWeb Service Provider
- * 
- * @package MightyWeb
+ *
  * @version 1.1.0
- * 
+ *
  * MightyWeb is a Laravel package for managing mobile app configurations
- * with a modern Livewire Volt architecture, Livewire Flux UI, and Tailwind CSS styling.
- * 
+ * with Livewire 4 Single File Components (SFC), Livewire Flux UI, and Tailwind CSS styling.
+ *
  * Features:
- * - Livewire Volt class-based components with modal CRUD
+ * - Livewire 4 Single File Components (SFC) with modal CRUD
  * - Livewire Flux professional UI components (WCAG 2.1 AA compliant)
  * - 8 core modules for app configuration management
  * - Vite-powered asset compilation with automatic cache busting
  * - Dark mode support throughout
  * - Responsive design with Tailwind CSS 4
- * 
+ *
  * Usage:
  * - Add @mightywebAssets to <head> section (includes Flux appearance)
  * - Add @mightywebScripts before </body> (includes Flux scripts)
@@ -55,13 +53,13 @@ class MightyWebServiceProvider extends ServiceProvider
 
         // Load package migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        
-        // Register Volt components path for auto-discovery
-        if (class_exists(\Livewire\Volt\Volt::class)) {
-            \Livewire\Volt\Volt::mount([
-                __DIR__.'/../resources/views/livewire'
-            ]);
-        }
+
+        // Register SFC components namespace for auto-discovery (Livewire 4 native SFC)
+        // Components are invoked as <livewire:mightyweb::component-name />
+        Livewire::addNamespace(
+            namespace: 'mightyweb',
+            viewPath: __DIR__.'/../resources/views',
+        );
 
         // Publish configuration file
         $this->publishes([
@@ -112,29 +110,23 @@ class MightyWebServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register Livewire Volt components.
-     * 
-     * Note: All components have been migrated to Volt class-based architecture (v2.1.0).
-     * Volt components are automatically discovered from view files, so no manual 
-     * registration is needed. This method is kept for backwards compatibility and
-     * for any future non-Volt components.
+     * Register Livewire Single File Components.
+     *
+     * SFC components are auto-discovered via the 'mightyweb' namespace
+     * registered in boot(). This method is kept for any future explicit
+     * component registrations.
      */
     protected function registerLivewireComponents(): void
     {
-        // Register the unified Dashboard component (class-based, not Volt)
-        #Livewire::component('mightyweb.dashboard', \MightyWeb\Http\Livewire\Dashboard::class);
-        
-        // Volt components are auto-discovered from:
-        // - resources/views/livewire/floating-button/index.blade.php
-        // - resources/views/livewire/tab/index.blade.php
-        // - resources/views/livewire/navigation-icon/index.blade.php
-        // - resources/views/livewire/walkthrough/index.blade.php
-        // - resources/views/livewire/menu/index.blade.php
-        // - resources/views/livewire/page/index.blade.php
-        // - resources/views/livewire/theme/configuration.blade.php
-        // - resources/views/livewire/app-configuration.blade.php
-        
-        // All CRUD operations are now modal-based within single Volt components.
-        // No separate create/edit components needed.
+        // SFC components are auto-discovered from:
+        // - resources/views/floating-button/index.blade.php
+        // - resources/views/tab/index.blade.php
+        // - resources/views/navigation-icon/index.blade.php
+        // - resources/views/walkthrough/index.blade.php
+        // - resources/views/menu/index.blade.php
+        // - resources/views/page/index.blade.php
+        // - resources/views/theme/configuration.blade.php
+        // - resources/views/app-configuration.blade.php
+        // - resources/views/notification/index.blade.php
     }
 }

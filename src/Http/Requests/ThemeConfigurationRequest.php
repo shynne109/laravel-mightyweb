@@ -2,6 +2,7 @@
 
 namespace MightyWeb\Http\Requests;
 
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use MightyWeb\Rules\HexColorRule;
 
@@ -18,16 +19,16 @@ class ThemeConfigurationRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array<string, Rule|array|string>
      */
     public function rules(): array
     {
         return [
-            'primary_color' => ['required', 'string', new HexColorRule()],
-            'secondary_color' => ['required', 'string', new HexColorRule()],
-            'accent_color' => ['required', 'string', new HexColorRule()],
-            'background_color' => ['required', 'string', new HexColorRule()],
-            'text_color' => ['required', 'string', new HexColorRule()],
+            'primary_color' => ['required', 'string', new HexColorRule],
+            'secondary_color' => ['required', 'string', new HexColorRule],
+            'accent_color' => ['required', 'string', new HexColorRule],
+            'background_color' => ['required', 'string', new HexColorRule],
+            'text_color' => ['required', 'string', new HexColorRule],
             'font_family' => ['required', 'string', 'max:100'],
             'style_preset' => ['required', 'string', 'in:default,dark,ocean,sunset,forest'],
             'is_dark_mode' => ['boolean'],

@@ -1,6 +1,6 @@
 <?php
 
-use Livewire\Volt\Component;
+use Livewire\Component;
 use MightyWeb\Models\AppSetting;
 
 new class extends Component {
@@ -99,7 +99,7 @@ new class extends Component {
                                        name="themeStyle" 
                                        value="{{ $option['value'] }}" 
                                        class="sr-only peer">
-                                <div class="flex items-center justify-between p-4 border-2 rounded-lg transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
+                                <div class="flex items-center justify-between p-4 border-2 rounded-lg transition-all peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/20 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
                                     <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $option['label'] }}</span>
                                     <div class="w-10 h-10 rounded" style="background-color: {{ $option['preview'] }}"></div>
                                 </div>
@@ -115,7 +115,7 @@ new class extends Component {
                                wire:model.live="themeStyle" 
                                name="themeStyle" 
                                value="Custom" 
-                               class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                               class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 focus:ring-primary-500">
                         <span class="ml-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Custom Color Theme</span>
                     </label>
                     
@@ -129,7 +129,7 @@ new class extends Component {
                                        class="h-12 w-20 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" 
                                        wire:model.defer="customColor" 
-                                       class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                        placeholder="#4788ff"
                                        maxlength="7">
                             </div>
@@ -147,7 +147,7 @@ new class extends Component {
                                wire:model.live="themeStyle" 
                                name="themeStyle" 
                                value="Gradient" 
-                               class="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                               class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 focus:ring-primary-500">
                         <span class="ml-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Gradient Color Theme</span>
                     </label>
                     
@@ -164,7 +164,7 @@ new class extends Component {
                                                    class="h-12 w-20 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer">
                                             <input type="text" 
                                                    wire:model.defer="gradientColor1" 
-                                                   class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                                    placeholder="#4788ff"
                                                    maxlength="7">
                                         </div>
@@ -182,7 +182,7 @@ new class extends Component {
                                                    class="h-12 w-20 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer">
                                             <input type="text" 
                                                    wire:model.defer="gradientColor2" 
-                                                   class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white uppercase focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                                    placeholder="#4788ff"
                                                    maxlength="7">
                                         </div>

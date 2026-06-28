@@ -39,8 +39,6 @@ class LeftHeaderIcon extends Model
 
     /**
      * Get the database connection for the model.
-     *
-     * @return string|null
      */
     public function getConnectionName(): ?string
     {
@@ -57,37 +55,33 @@ class LeftHeaderIcon extends Model
 
     /**
      * Get the full URL for the icon image.
-     *
-     * @return string|null
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return null;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
 
-        return Storage::disk($disk)->url($path . '/lefticon/' . $this->image);
+        return Storage::disk($disk)->url($path.'/lefticon/'.$this->image);
     }
 
     /**
      * Delete the icon image from storage.
-     *
-     * @return bool
      */
     public function deleteImage(): bool
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return false;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $path . '/lefticon/' . $this->image;
+        $fullPath = $path.'/lefticon/'.$this->image;
 
-        return Storage::disk($disk)->exists($fullPath) 
+        return Storage::disk($disk)->exists($fullPath)
             ? Storage::disk($disk)->delete($fullPath)
             : false;
     }

@@ -21,10 +21,10 @@ $apiConfig = config('mightyweb.api', [
 Route::prefix($apiConfig['prefix'])
     ->middleware($apiConfig['middleware'])
     ->group(function () {
-        
+
         // Get full app configuration as JSON
         Route::get('/config', [ConfigController::class, 'index'])->name('api.config');
-        
+
         // Get specific configuration sections
         Route::get('/config/app-settings', [ConfigController::class, 'appSettings'])->name('api.config.app-settings');
         Route::get('/config/walkthrough', [ConfigController::class, 'walkthrough'])->name('api.config.walkthrough');
@@ -32,7 +32,7 @@ Route::prefix($apiConfig['prefix'])
         Route::get('/config/tabs', [ConfigController::class, 'tabs'])->name('api.config.tabs');
         Route::get('/config/pages', [ConfigController::class, 'pages'])->name('api.config.pages');
         Route::get('/config/theme', [ConfigController::class, 'theme'])->name('api.config.theme');
-        
+
         // Health check
         Route::get('/health', function () {
             return response()->json([

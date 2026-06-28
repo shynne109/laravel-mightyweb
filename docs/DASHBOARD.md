@@ -1,7 +1,7 @@
 # MightyWeb Dashboard Component
 
 **Version:** 1.1.0  
-**Component:** `@livewire('mightyweb.dashboard')`  
+**Component:** `@livewire('mightyweb::dashboard')`  
 **File:** `resources/views/livewire/dashboard.blade.php`
 
 ---
@@ -43,7 +43,7 @@ Simply add the Livewire component to any Blade view:
 @extends('layouts.app')
 
 @section('content')
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @endsection
 ```
 
@@ -67,7 +67,7 @@ Integrate into your own page structure:
     
     {{-- Embed MightyWeb Dashboard --}}
     <div class="mt-8">
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 </div>
 ```
@@ -80,14 +80,14 @@ The dashboard provides tabbed access to all 8 MightyWeb modules:
 
 | Tab | Module | Icon | Description |
 |-----|--------|------|-------------|
-| **App Config** | `mightyweb.app-configuration` | ⚙️ Cog | App settings, URLs, integrations |
-| **Theme** | `mightyweb.theme.configuration` | 🎨 Paint Brush | Colors, fonts, dark mode |
-| **Walkthrough** | `mightyweb.walkthrough.index` | 🎓 Academic Cap | Onboarding screens |
-| **Menus** | `mightyweb.menu.index` | ☰ Bars | Navigation menus |
-| **Pages** | `mightyweb.page.index` | 📄 Document | Content pages |
-| **Bottom Tabs** | `mightyweb.tab.index` | ⬜ Columns | Bottom navigation |
-| **Nav Icons** | `mightyweb.navigation-icon.index` | ⚡ Squares | Header icons |
-| **FAB** | `mightyweb.floating-button.index` | ➕ Plus | Floating buttons |
+| **App Config** | `mightyweb::app-configuration` | ⚙️ Cog | App settings, URLs, integrations |
+| **Theme** | `mightyweb::theme.configuration` | 🎨 Paint Brush | Colors, fonts, dark mode |
+| **Walkthrough** | `mightyweb::walkthrough.index` | 🎓 Academic Cap | Onboarding screens |
+| **Menus** | `mightyweb::menu.index` | ☰ Bars | Navigation menus |
+| **Pages** | `mightyweb::page.index` | 📄 Document | Content pages |
+| **Bottom Tabs** | `mightyweb::tab.index` | ⬜ Columns | Bottom navigation |
+| **Nav Icons** | `mightyweb::navigation-icon.index` | ⚡ Squares | Header icons |
+| **FAB** | `mightyweb::floating-button.index` | ➕ Plus | Floating buttons |
 
 ---
 
@@ -128,14 +128,14 @@ Switches to the specified tab. Called automatically when user clicks tab navigat
 Modify the initial active tab in your Blade view:
 
 ```blade
-@livewire('mightyweb.dashboard', ['activeTab' => 'theme'])
+@livewire('mightyweb::dashboard', ['activeTab' => 'theme'])
 ```
 
 Or programmatically:
 
 ```php
 <div x-data="{ tab: 'menu' }">
-    @livewire('mightyweb.dashboard', ['activeTab' => 'menu'])
+    @livewire('mightyweb::dashboard', ['activeTab' => 'menu'])
 </div>
 ```
 
@@ -216,7 +216,7 @@ Listen to tab changes:
 
 ```blade
 <div x-data @tab-changed.window="console.log($event.detail.tab)">
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </div>
 ```
 
@@ -245,7 +245,7 @@ public function switchTab(string $tab): void
     @mightywebAssets
 </head>
 <body>
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
     @mightywebScripts
 </body>
 </html>
@@ -267,7 +267,7 @@ public function switchTab(string $tab): void
         {{-- Main Content --}}
         <div class="col-span-9">
             <h1>Mobile App Configuration</h1>
-            @livewire('mightyweb.dashboard')
+            @livewire('mightyweb::dashboard')
         </div>
     </div>
 @endsection
@@ -284,7 +284,7 @@ public function switchTab(string $tab): void
     </div>
     
     {{-- Dashboard --}}
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
     
     {{-- Custom Footer --}}
     <div class="text-center text-sm text-gray-500">
@@ -297,7 +297,7 @@ public function switchTab(string $tab): void
 
 ```blade
 @can('manage-app-config')
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @else
     <div class="alert alert-warning">
         You don't have permission to access this dashboard.
@@ -329,7 +329,7 @@ For modules with lots of data, consider lazy loading:
 @if ($activeTab === 'menu')
     <div wire:init="loadMenuData">
         @if ($menuDataLoaded)
-            @livewire('mightyweb.menu.index')
+            @livewire('mightyweb::menu.index')
         @else
             <div>Loading menus...</div>
         @endif
@@ -363,10 +363,13 @@ All tab modules already use pagination for large datasets.
 ```
 
 ### Issue: Livewire components not rendering
-**Solution:** Check component naming in service provider:
+**Solution:** Check component namespace in service provider:
 ```php
-// Should auto-discover, but can manually register:
-Livewire::component('mightyweb.dashboard', Dashboard::class);
+// SFC components are auto-discovered via namespace:
+Livewire::addNamespace(
+    namespace: 'mightyweb',
+    viewPath: __DIR__.'/../resources/views',
+);
 ```
 
 ### Issue: Styles not applied
@@ -388,7 +391,7 @@ php artisan vendor:publish --tag=mightyweb-assets --force
 ## 📊 Benefits
 
 ### For Developers
-✅ **Easy Integration** - Just one line: `@livewire('mightyweb.dashboard')`  
+✅ **Easy Integration** - Just one line: `@livewire('mightyweb::dashboard')`  
 ✅ **Flexible Placement** - Works in any Blade view  
 ✅ **No Routing Needed** - Component handles all navigation internally  
 ✅ **Customizable** - Easy to modify tabs, order, and styling  
@@ -418,7 +421,7 @@ php artisan vendor:publish --tag=mightyweb-assets --force
 
 ## 📚 Related Documentation
 
-- [Livewire Volt Documentation](https://livewire.laravel.com/docs/volt)
+- [Livewire SFC Documentation](https://livewire.laravel.com/docs/4.x/single-file-components)
 - [Livewire Flux Components](https://fluxui.dev)
 - [MightyWeb Package README](../README.md)
 - [Individual Module Documentation](./USAGE.md)
@@ -427,4 +430,4 @@ php artisan vendor:publish --tag=mightyweb-assets --force
 
 **Dashboard Component Ready!** 🎉
 
-Now users can simply add `@livewire('mightyweb.dashboard')` to any page and get instant access to all MightyWeb configuration modules in a beautiful tabbed interface.
+Now users can simply add `@livewire('mightyweb::dashboard')` to any page and get instant access to all MightyWeb configuration modules in a beautiful tabbed interface.

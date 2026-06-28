@@ -11,7 +11,7 @@ Quick reference for integrating the MightyWeb dashboard into your Laravel applic
 @extends('layouts.app')
 
 @section('content')
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @endsection
 ```
 
@@ -33,7 +33,7 @@ Access at: `http://yourapp.com/admin/mightyweb`
     @mightywebAssets
 </head>
 <body class="bg-gray-50">
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
     @mightywebScripts
 </body>
 </html>
@@ -51,7 +51,7 @@ Access at: `http://yourapp.com/admin/mightyweb`
             <p class="text-gray-600">Configure your mobile app from here</p>
         </div>
         
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 @endsection
 ```
@@ -67,7 +67,7 @@ Access at: `http://yourapp.com/admin/mightyweb`
     
     {{-- Main Content --}}
     <main class="flex-1">
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </main>
 </div>
 ```
@@ -89,7 +89,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 @section('content')
     @can('manage-app-settings')
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     @else
         <div class="alert alert-danger">
             You don't have permission to manage app settings.
@@ -108,10 +108,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // routes/web.php
 Route::get('/mightyweb', function () {
     return view('mightyweb::pages.dashboard');
-})->name('mightyweb.dashboard');
+})->name('mightyweb::index');
 
 // Usage in links:
-<a href="{{ route('mightyweb.dashboard', ['tab' => 'theme']) }}">
+<a href="{{ route('mightyweb::index', ['tab' => 'theme']) }}">
     Manage Theme
 </a>
 ```
@@ -129,7 +129,7 @@ public function mount()
 ### Method 2: Component Property
 
 ```blade
-@livewire('mightyweb.dashboard', ['activeTab' => 'theme'])
+@livewire('mightyweb::dashboard', ['activeTab' => 'theme'])
 ```
 
 ---
@@ -140,7 +140,7 @@ public function mount()
 
 ```blade
 @if(auth()->user()->hasRole('super-admin'))
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @else
     <div class="alert alert-warning">
         Only super admins can access this dashboard.
@@ -152,11 +152,11 @@ public function mount()
 
 ```blade
 @can('manage-app-config')
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @elsecan('view-app-config')
     {{-- Read-only version --}}
     <div x-data="{ readOnly: true }">
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 @else
     <x-permission-denied />
@@ -179,9 +179,9 @@ public function showDashboard()
 ```blade
 {{-- In view --}}
 @if($canEdit)
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 @elseif($canViewTheme)
-    @livewire('mightyweb.dashboard', ['activeTab' => 'theme'])
+    @livewire('mightyweb::dashboard', ['activeTab' => 'theme'])
 @else
     <p>No access</p>
 @endif
@@ -204,7 +204,7 @@ public function showDashboard()
         </p>
     </div>
     
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </div>
 ```
 
@@ -213,7 +213,7 @@ public function showDashboard()
 ```blade
 <div class="dark">
     <div class="bg-gray-900 min-h-screen">
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 </div>
 ```
@@ -234,7 +234,7 @@ public function showDashboard()
 
 {{-- MightyWeb Dashboard --}}
 <div class="container mx-auto">
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </div>
 ```
 
@@ -259,7 +259,7 @@ public function showDashboard()
         
         {{-- Main content --}}
         <main class="flex-1 p-4 lg:p-8">
-            @livewire('mightyweb.dashboard')
+            @livewire('mightyweb::dashboard')
         </main>
     </div>
 </div>
@@ -280,7 +280,7 @@ public function showDashboard()
     
     {{-- Dashboard --}}
     <div @config-saved.window="notification = true; setTimeout(() => notification = false, 3000)">
-        @livewire('mightyweb.dashboard')
+        @livewire('mightyweb::dashboard')
     </div>
 </div>
 ```
@@ -302,7 +302,7 @@ public function showDashboard()
              'view_count': tabViews[tab]
          });
      ">
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </div>
 ```
 
@@ -323,7 +323,7 @@ public function showDashboard()
     </div>
     
     {{-- Dashboard --}}
-    @livewire('mightyweb.dashboard')
+    @livewire('mightyweb::dashboard')
 </div>
 
 <script>
@@ -352,7 +352,7 @@ function importConfig() {
 ### Tip 1: Preload Specific Tab
 ```blade
 {{-- Load theme tab by default --}}
-@livewire('mightyweb.dashboard', ['activeTab' => 'theme'])
+@livewire('mightyweb::dashboard', ['activeTab' => 'theme'])
 ```
 
 ### Tip 2: Hide Tabs You Don't Need

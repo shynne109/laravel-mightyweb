@@ -146,12 +146,12 @@
 
                 @if (session('info'))
                     <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 5000)" 
-                         class="mb-4 bg-blue-100 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-200 p-4 rounded-lg shadow-md flex items-center justify-between">
+                         class="mb-4 bg-primary-100 dark:bg-primary-900 border-l-4 border-primary-500 text-primary-700 dark:text-primary-200 p-4 rounded-lg shadow-md flex items-center justify-between">
                         <div class="flex items-center">
                             <i class="ri-information-line text-2xl mr-3"></i>
                             <span>{{ session('info') }}</span>
                         </div>
-                        <button @click="show = false" class="text-blue-700 dark:text-blue-200 hover:text-blue-900 dark:hover:text-blue-100">
+                        <button @click="show = false" class="text-primary-700 dark:text-primary-200 hover:text-primary-900 dark:hover:text-primary-100">
                             <i class="ri-close-line text-xl"></i>
                         </button>
                     </div>

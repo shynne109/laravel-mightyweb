@@ -1,6 +1,6 @@
 <?php
 
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
@@ -12,7 +12,7 @@ new class extends Component {
 
     // Table properties
     public string $search = '';
-    public string $sortField = 'sort_order';
+    public string $sortField = 'id';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
 
@@ -32,7 +32,7 @@ new class extends Component {
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'sortField' => ['except' => 'sort_order'],
+        'sortField' => ['except' => 'id'],
         'sortDirection' => ['except' => 'asc'],
     ];
 
@@ -73,11 +73,10 @@ new class extends Component {
         $this->reset(['title', 'icon', 'currentIcon', 'action', 'sort_order', 'is_active']);
         
         // Auto-calculate next sort order
-        $maxOrder = FloatingButton::max('sort_order');
+        $maxOrder = FloatingButton::max('id');
         $this->sort_order = $maxOrder ? $maxOrder + 1 : 1;
         $this->is_active = true;
-        
-        $this->showCreateModal = true;
+        $this->modal('showCreateModal')->show();
     }
 
     // Open edit modal
@@ -88,19 +87,18 @@ new class extends Component {
         $this->buttonId = $button->id;
         $this->title = $button->title;
         $this->action = $button->action;
-        $this->sort_order = $button->sort_order;
+        $this->sort_order = $button->id;
         $this->is_active = $button->is_active;
         $this->currentIcon = $button->icon;
         $this->icon = null;
-        
-        $this->showEditModal = true;
+        $this->modal('showEditModal')->show();
     }
 
     // Confirm delete
     public function confirmDelete(int $id): void
     {
         $this->buttonId = $id;
-        $this->showDeleteModal = true;
+        $this->modal('showDeleteModal')->show();
     }
 
     // Validation rules
@@ -112,7 +110,6 @@ new class extends Component {
             'title' => 'required|string|max:255',
             'icon' => $iconRule,
             'action' => 'required|string|max:500',
-            'sort_order' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ];
     }
@@ -127,9 +124,6 @@ new class extends Component {
             'icon.max' => 'The image size cannot exceed 2MB.',
             'action.required' => 'Action is required.',
             'action.max' => 'Action cannot exceed 500 characters.',
-            'sort_order.required' => 'Sort order is required.',
-            'sort_order.integer' => 'Sort order must be a number.',
-            'sort_order.min' => 'Sort order cannot be negative.',
         ];
     }
 
@@ -145,11 +139,10 @@ new class extends Component {
             'title' => $this->title,
             'icon' => $iconPath,
             'action' => $this->action,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ]);
 
-        $this->showCreateModal = false;
+        $this->modal('showCreateModal')->close();
         $this->reset(['title', 'icon', 'action', 'sort_order', 'is_active']);
         
         session()->flash('success', 'Floating button created successfully!');
@@ -167,7 +160,6 @@ new class extends Component {
         $data = [
             'title' => $this->title,
             'action' => $this->action,
-            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ];
 
@@ -180,8 +172,7 @@ new class extends Component {
         }
 
         $button->update($data);
-
-        $this->showEditModal = false;
+        $this->modal('showEditModal')->close();
         $this->reset(['buttonId', 'title', 'icon', 'currentIcon', 'action', 'sort_order', 'is_active']);
         
         session()->flash('success', 'Floating button updated successfully!');
@@ -200,8 +191,7 @@ new class extends Component {
         }
         
         $button->delete();
-
-        $this->showDeleteModal = false;
+        $this->modal('showDeleteModal')->close();
         $this->reset('buttonId');
         
         session()->flash('success', 'Floating button deleted successfully!');
@@ -227,7 +217,8 @@ new class extends Component {
     {
         $this->icon = null;
     }
-}; ?>
+}; 
+?>
 
 <div class="p-6">
     {{-- Header --}}
@@ -236,9 +227,11 @@ new class extends Component {
             <flux:heading size="xl">Floating Action Buttons</flux:heading>
             <flux:subheading>Manage floating action buttons in your app</flux:subheading>
         </div>
-        <flux:button wire:click="openCreateModal" variant="primary" icon="plus">
+        <flux:modal.trigger name="showCreateModal">
+        <flux:button variant="primary" icon="plus">
             Add New Button
         </flux:button>
+        </flux:modal.trigger>
     </div>
 
     {{-- Search and Filter Bar --}}
@@ -248,10 +241,10 @@ new class extends Component {
         </div>
         <div class="flex items-center gap-2">
             <flux:select wire:model.live="perPage" placeholder="Per page">
-                <flux:option value="5">5</flux:option>
-                <flux:option value="10">10</flux:option>
-                <flux:option value="25">25</flux:option>
-                <flux:option value="50">50</flux:option>
+                <flux:select.option value="5">5</flux:select.option>
+                <flux:select.option value="10">10</flux:select.option>
+                <flux:select.option value="25">25</flux:select.option>
+                <flux:select.option value="50">50</flux:select.option>
             </flux:select>
         </div>
     </div>
@@ -279,11 +272,11 @@ new class extends Component {
             <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                 <thead class="bg-gray-50 dark:bg-zinc-700">
                     <tr>
-                        <th wire:click="sortBy('sort_order')" 
+                        <th wire:click="sortBy('id')" 
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-600">
                             <div class="flex items-center space-x-1">
                                 <span>Order</span>
-                                @if ($sortField === 'sort_order')
+                                @if ($sortField === 'id')
                                     <flux:icon.{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }} class="w-4 h-4" />
                                 @endif
                             </div>
@@ -321,7 +314,7 @@ new class extends Component {
                     @forelse ($buttons as $button)
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <flux:badge size="sm" color="zinc">{{ $button->sort_order }}</flux:badge>
+                                <flux:badge size="sm" color="zinc">{{ $button->id }}</flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($button->icon)
@@ -377,7 +370,7 @@ new class extends Component {
     </div>
 
     {{-- Create Modal --}}
-    <flux:modal name="create-button" wire:model="showCreateModal" variant="flyout">
+    <flux:modal variant="flyout" name="showCreateModal" wire:model="showCreateModal" variant="flyout">
         <form wire:submit="save">
             <flux:heading size="lg">Create Floating Button</flux:heading>
             <flux:subheading>Add a new floating action button to your app.</flux:subheading>
@@ -435,7 +428,7 @@ new class extends Component {
     </flux:modal>
 
     {{-- Edit Modal --}}
-    <flux:modal name="edit-button" wire:model="showEditModal" variant="flyout">
+    <flux:modal variant="flyout" name="showEditModal" wire:model="showEditModal" variant="flyout">
         <form wire:submit="update">
             <flux:heading size="lg">Edit Floating Button</flux:heading>
             <flux:subheading>Update button details and settings.</flux:subheading>
@@ -502,7 +495,7 @@ new class extends Component {
     </flux:modal>
 
     {{-- Delete Confirmation Modal --}}
-    <flux:modal name="delete-button" wire:model="showDeleteModal">
+    <flux:modal name="showDeleteModal" wire:model="showDeleteModal">
         <flux:heading size="lg">Delete Floating Button</flux:heading>
         <flux:subheading>Are you sure you want to delete this floating button? This action cannot be undone.</flux:subheading>
 

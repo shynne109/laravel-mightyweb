@@ -9,8 +9,6 @@ class DashboardController extends Controller
 {
     /**
      * Display the dashboard.
-     *
-     * @return View
      */
     public function index(): View
     {

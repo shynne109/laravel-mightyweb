@@ -6,22 +6,18 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 
 class FileUploadService
 {
     /**
      * Upload an image file.
      *
-     * @param UploadedFile $file
-     * @param string $directory
-     * @param string|null $oldFile
      * @return string|false
      */
     public function uploadImage(UploadedFile $file, string $directory, ?string $oldFile = null, $width = null, $height = null)
     {
         // Validate image
-        if (!$this->isValidImage($file)) {
+        if (! $this->isValidImage($file)) {
             return false;
         }
 
@@ -29,10 +25,11 @@ class FileUploadService
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
         $optimize = config('mightyweb.images.optimize', true);
+        $visibility = config('mightyweb.storage.visibility', 'public');
 
         // Generate unique filename
         $filename = $this->generateFilename($file);
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
         // Optimize and save image
         if ($optimize) {
@@ -41,20 +38,20 @@ class FileUploadService
             Storage::disk($disk)->put($fullPath, file_get_contents($file->getRealPath()));
         }
 
+        // Set visibility for cloud disks (S3, etc.)
+        Storage::disk($disk)->setVisibility($fullPath, $visibility);
+
         // Delete old file if exists
         if ($oldFile) {
-            $this->deleteFile($directory, $oldFile);
+            $this->deleteOldFile($oldFile);
         }
+
         // Return full URL instead of just filename
         return $this->getFileUrl($directory, $filename);
     }
 
     /**
-     * Delete a file.
-     *
-     * @param string $directory
-     * @param string $filename
-     * @return bool
+     * Delete a file by directory and filename.
      */
     public function deleteFile(string $directory, string $filename): bool
     {
@@ -64,7 +61,7 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
         if (Storage::disk($disk)->exists($fullPath)) {
             return Storage::disk($disk)->delete($fullPath);
@@ -74,11 +71,55 @@ class FileUploadService
     }
 
     /**
+     * Delete an old file from a URL or storage path.
+     */
+    public function deleteOldFile(string $fileUrlOrPath): bool
+    {
+        if (empty($fileUrlOrPath)) {
+            return false;
+        }
+
+        $disk = config('mightyweb.storage.disk', 'public');
+        $storagePath = $this->resolveStoragePath($fileUrlOrPath);
+
+        if ($storagePath && Storage::disk($disk)->exists($storagePath)) {
+            return Storage::disk($disk)->delete($storagePath);
+        }
+
+        return false;
+    }
+
+    /**
+     * Resolve a URL or path to a relative storage path.
+     */
+    protected function resolveStoragePath(string $fileUrlOrPath): ?string
+    {
+        $disk = config('mightyweb.storage.disk', 'public');
+        $basePath = config('mightyweb.storage.path', 'mightyweb');
+
+        // If it's already a relative path containing the base path, return as-is
+        if (str_contains($fileUrlOrPath, $basePath) && ! str_starts_with($fileUrlOrPath, 'http')) {
+            return $fileUrlOrPath;
+        }
+
+        // Extract path from full URL by comparing against the disk's base URL
+        $diskUrl = rtrim(Storage::disk($disk)->url(''), '/');
+        if (str_starts_with($fileUrlOrPath, $diskUrl)) {
+            return ltrim(str_replace($diskUrl, '', $fileUrlOrPath), '/');
+        }
+
+        // Try to extract the storage-relative path from any URL
+        if (str_contains($fileUrlOrPath, $basePath)) {
+            $pos = strpos($fileUrlOrPath, $basePath);
+
+            return substr($fileUrlOrPath, $pos);
+        }
+
+        return null;
+    }
+
+    /**
      * Get the full URL for a file.
-     *
-     * @param string $directory
-     * @param string $filename
-     * @return string|null
      */
     public function getFileUrl(string $directory, string $filename): ?string
     {
@@ -88,50 +129,47 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
         return Storage::disk($disk)->url($fullPath);
     }
 
     /**
      * Optimize and save image.
-     *
-     * @param UploadedFile $file
-     * @param string $disk
-     * @param string $path
-     * @return void
      */
     protected function optimizeAndSave(UploadedFile $file, string $disk, string $path, $imageWidth = null, $imageHeight = null): void
     {
         $maxWidth = config('mightyweb.images.max_width', 2000);
         $maxHeight = config('mightyweb.images.max_height', 2000);
         $quality = config('mightyweb.images.quality', 85);
-        // create new image instance
+
         $image = ImageManager::gd()->read($file);
-        // Get original dimensions
+
         $width = $image->width();
         $height = $image->height();
 
         if ($imageWidth != null || $imageHeight != null) {
             $image->resize($imageWidth, $imageHeight);
         }
-        // Resize if necessary (maintain aspect ratio)
+
         if ($width > $maxWidth || $height > $maxHeight) {
             $image->resize($maxWidth, $maxHeight);
         }
-        // Encode with quality
-        $encoded = $image->toPng();
-        // Save to storage
+
+        // Encode preserving original format
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $encoded = match ($extension) {
+            'jpg', 'jpeg' => $image->toJpeg($quality),
+            'webp' => $image->toWebp($quality),
+            'gif' => $image->toGif(),
+            default => $image->toPng(),
+        };
+
         Storage::disk($disk)->put($path, $encoded->__toString());
-
-
     }
 
     /**
      * Validate if file is a valid image.
-     *
-     * @param UploadedFile $file
-     * @return bool
      */
     protected function isValidImage(UploadedFile $file): bool
     {
@@ -140,7 +178,7 @@ class FileUploadService
 
         // Check extension
         $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, $allowedTypes)) {
+        if (! in_array($extension, $allowedTypes)) {
             return false;
         }
 
@@ -151,7 +189,7 @@ class FileUploadService
         }
 
         // Check if file is actually an image
-        if (!$this->isImage($file)) {
+        if (! $this->isImage($file)) {
             return false;
         }
 
@@ -160,14 +198,12 @@ class FileUploadService
 
     /**
      * Check if file is an image using getimagesize.
-     *
-     * @param UploadedFile $file
-     * @return bool
      */
     protected function isImage(UploadedFile $file): bool
     {
         try {
             $imageInfo = @getimagesize($file->getRealPath());
+
             return $imageInfo !== false;
         } catch (\Exception $e) {
             return false;
@@ -176,28 +212,21 @@ class FileUploadService
 
     /**
      * Generate a unique filename.
-     *
-     * @param UploadedFile $file
-     * @return string
      */
     protected function generateFilename(UploadedFile $file): string
     {
         $extension = $file->getClientOriginalExtension();
         $basename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        
+
         // Sanitize basename
         $basename = Str::slug($basename);
-        
+
         // Generate unique name with timestamp
-        return $basename . '_' . time() . '_' . Str::random(8) . '.' . $extension;
+        return $basename.'_'.time().'_'.Str::random(8).'.'.$extension;
     }
 
     /**
      * Get image dimensions.
-     *
-     * @param string $directory
-     * @param string $filename
-     * @return array|null
      */
     public function getImageDimensions(string $directory, string $filename): ?array
     {
@@ -207,14 +236,15 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
-        if (!Storage::disk($disk)->exists($fullPath)) {
+        if (! Storage::disk($disk)->exists($fullPath)) {
             return null;
         }
 
         try {
             $image = ImageManager::gd()->read(Storage::disk($disk)->get($fullPath));
+
             return [
                 'width' => $image->width(),
                 'height' => $image->height(),
@@ -227,10 +257,6 @@ class FileUploadService
     /**
      * Create thumbnail from image.
      *
-     * @param string $directory
-     * @param string $filename
-     * @param int $width
-     * @param int $height
      * @return string|false
      */
     public function createThumbnail(string $directory, string $filename, int $width = 150, int $height = 150)
@@ -241,9 +267,9 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
-        if (!Storage::disk($disk)->exists($fullPath)) {
+        if (! Storage::disk($disk)->exists($fullPath)) {
             return false;
         }
 
@@ -255,8 +281,8 @@ class FileUploadService
 
             // Generate thumbnail filename
             $pathInfo = pathinfo($filename);
-            $thumbnailName = $pathInfo['filename'] . '_thumb.' . $pathInfo['extension'];
-            $thumbnailPath = $basePath . '/' . $directory . '/thumbs/' . $thumbnailName;
+            $thumbnailName = $pathInfo['filename'].'_thumb.'.$pathInfo['extension'];
+            $thumbnailPath = $basePath.'/'.$directory.'/thumbs/'.$thumbnailName;
 
             // Save thumbnail
             Storage::disk($disk)->put($thumbnailPath, $image->encode()->__toString());
@@ -269,11 +295,6 @@ class FileUploadService
 
     /**
      * Copy file from one directory to another.
-     *
-     * @param string $fromDirectory
-     * @param string $toDirectory
-     * @param string $filename
-     * @return bool
      */
     public function copyFile(string $fromDirectory, string $toDirectory, string $filename): bool
     {
@@ -283,11 +304,11 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        
-        $fromPath = $basePath . '/' . $fromDirectory . '/' . $filename;
-        $toPath = $basePath . '/' . $toDirectory . '/' . $filename;
 
-        if (!Storage::disk($disk)->exists($fromPath)) {
+        $fromPath = $basePath.'/'.$fromDirectory.'/'.$filename;
+        $toPath = $basePath.'/'.$toDirectory.'/'.$filename;
+
+        if (! Storage::disk($disk)->exists($fromPath)) {
             return false;
         }
 
@@ -296,10 +317,6 @@ class FileUploadService
 
     /**
      * Get file size in human-readable format.
-     *
-     * @param string $directory
-     * @param string $filename
-     * @return string|null
      */
     public function getFileSize(string $directory, string $filename): ?string
     {
@@ -309,9 +326,9 @@ class FileUploadService
 
         $disk = config('mightyweb.storage.disk', 'public');
         $basePath = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $basePath . '/' . $directory . '/' . $filename;
+        $fullPath = $basePath.'/'.$directory.'/'.$filename;
 
-        if (!Storage::disk($disk)->exists($fullPath)) {
+        if (! Storage::disk($disk)->exists($fullPath)) {
             return null;
         }
 
@@ -322,10 +339,6 @@ class FileUploadService
 
     /**
      * Format bytes to human-readable format.
-     *
-     * @param int $bytes
-     * @param int $precision
-     * @return string
      */
     protected function formatBytes(int $bytes, int $precision = 2): string
     {
@@ -337,6 +350,6 @@ class FileUploadService
 
         $bytes /= pow(1024, $pow);
 
-        return round($bytes, $precision) . ' ' . $units[$pow];
+        return round($bytes, $precision).' '.$units[$pow];
     }
 }

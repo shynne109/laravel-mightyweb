@@ -12,17 +12,17 @@
 
 ---
 
-## 📱 Overview
+## Overview
 
-MightyWeb is a comprehensive Laravel package that provides a beautiful admin interface for managing mobile app configurations. Built with **Livewire Volt** and **Tailwind CSS 4**, it offers a modern, intuitive way to control your mobile app's content, appearance, and behavior.
+MightyWeb is a comprehensive Laravel package that provides a beautiful admin interface for managing mobile app configurations. Built with **Livewire 4 Single File Components (SFC)** and **Tailwind CSS 4**, it offers a modern, intuitive way to control your mobile app's content, appearance, and behavior.
 
 Perfect for managing Flutter, React Native, or any mobile app that needs dynamic configuration!
 
 ---
 
-## ✨ Features
+## Features
 
-### 🎨 **8 Core Modules**
+### 8 Core Modules
 
 | Module | Description |
 |--------|-------------|
@@ -35,41 +35,41 @@ Perfect for managing Flutter, React Native, or any mobile app that needs dynamic
 | **Navigation Icons** | Manage header icons (left/right) |
 | **Floating Button** | Configure floating action buttons |
 
-### 🚀 **Modern Technology Stack**
+### Modern Technology Stack
 
-- ✅ **Livewire Volt** - Single-file components with class-based syntax
-- ✅ **Livewire Flux** - Professional, accessible UI component library
-- ✅ **Tailwind CSS 4** - Modern utility-first styling
-- ✅ **Alpine.js** - Reactive UI components
-- ✅ **Vite** - Lightning-fast asset bundling
-- ✅ **PHP 8.2+** - Full type safety
-- ✅ **Laravel 11/12** - Latest framework features
+- **Livewire 4 SFC** - Native single-file components (no Volt dependency)
+- **Livewire Flux** - Professional, accessible UI component library
+- **Tailwind CSS 4** - Modern utility-first styling
+- **Alpine.js** - Reactive UI components
+- **Vite** - Lightning-fast asset bundling
+- **PHP 8.2+** - Full type safety
+- **Laravel 11/12/13** - Latest framework features
 
-### 💎 **User Experience**
+### User Experience
 
-- ✅ **Modal-based CRUD** - Fast, intuitive editing without page reloads
-- ✅ **Flux UI Components** - Professional, WCAG-compliant components
-- ✅ **Dark Mode** - Full dark mode support throughout
-- ✅ **Responsive Design** - Works on desktop, tablet, and mobile
-- ✅ **Search & Filter** - Find what you need quickly
-- ✅ **Image Upload** - Easy image management with previews
-- ✅ **Auto-save Feedback** - Loading states and success messages
-- ✅ **Accessibility** - WCAG 2.1 AA compliant out of the box
+- **Modal-based CRUD** - Fast, intuitive editing without page reloads
+- **Flux UI Components** - Professional, WCAG-compliant components
+- **Dark Mode** - Full dark mode support throughout
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Search & Filter** - Find what you need quickly
+- **Image Upload** - Easy image management with previews
+- **Auto-save Feedback** - Loading states and success messages
+- **Accessibility** - WCAG 2.1 AA compliant out of the box
 
 ---
 
-## 📋 Requirements
+## Requirements
 
 - **PHP** 8.2 or higher
-- **Laravel** 11.0 or 12.0
-- **Livewire** 3.5 or higher
-- **Livewire Flux** 2.6 or higher (automatically installed)
+- **Laravel** 11.0, 12.0, or 13.0
+- **Livewire** 4.0 or higher
+- **Livewire Flux** 2.13 or higher (automatically installed)
 - **Tailwind CSS** 4.0 or higher
 - **Alpine.js** 3.14 or higher
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Step 1: Install Package
 
@@ -124,16 +124,16 @@ Add these directives to your main layout file:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your App</title>
-    
+
     {{-- Your app's Vite assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     {{-- MightyWeb package assets --}}
     @mightywebAssets
 </head>
 <body>
     @yield('content')
-    
+
     {{-- MightyWeb package scripts --}}
     @mightywebScripts
 </body>
@@ -148,14 +148,12 @@ Visit `http://yourapp.com/mightyweb` to access the unified admin dashboard.
 
 ```blade
 {{-- In any Blade view --}}
-@livewire('mightyweb.dashboard')
+<livewire:mightyweb::index />
 ```
-
-This single component gives you access to all 8 configuration modules in a beautiful tabbed interface! 🎉
 
 ---
 
-## 📖 Usage
+## Usage
 
 ### Quick Start: Unified Dashboard
 
@@ -166,19 +164,19 @@ The easiest way to use MightyWeb is through the **unified dashboard component**:
 @extends('layouts.app')
 
 @section('content')
-    @livewire('mightyweb.dashboard')
+    <livewire:mightyweb::index />
 @endsection
 ```
 
 This provides instant access to all modules:
-- ⚙️ **App Configuration** - Settings, URLs, integrations
-- 🎨 **Theme** - Colors, fonts, dark mode  
-- 🎓 **Walkthrough** - Onboarding screens
-- ☰ **Menus** - Navigation structure
-- 📄 **Pages** - Content pages
-- ⬜ **Bottom Tabs** - Tab bar navigation
-- ⚡ **Nav Icons** - Header icons
-- ➕ **FAB** - Floating action buttons
+- **App Configuration** - Settings, URLs, integrations
+- **Theme** - Colors, fonts, dark mode
+- **Walkthrough** - Onboarding screens
+- **Menus** - Navigation structure
+- **Pages** - Content pages
+- **Bottom Tabs** - Tab bar navigation
+- **Nav Icons** - Header icons
+- **FAB** - Floating action buttons
 
 See [Dashboard Documentation](docs/DASHBOARD.md) for advanced usage.
 
@@ -275,7 +273,7 @@ Returns JSON response with all app settings, menus, pages, tabs, icons, etc.
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Publishing Configuration
 
@@ -311,7 +309,7 @@ php artisan vendor:publish --tag=mightyweb-migrations
 
 ---
 
-## 🔧 Development
+## Development
 
 ### Building Assets
 
@@ -344,36 +342,62 @@ Built assets are located in:
 public/vendor/mightyweb/build/
 ├── .vite/manifest.json
 └── assets/
-    ├── app-[hash].css  (82KB → 12KB gzipped)
-    └── app-[hash].js   (48KB → 17KB gzipped)
+    ├── app-[hash].css  (82KB -> 12KB gzipped)
+    └── app-[hash].js   (48KB -> 17KB gzipped)
 ```
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-### Livewire Volt Components
+### Livewire 4 Single File Components
 
-All modules use Livewire Volt class-based components:
+All modules use Livewire 4 native Single File Components (SFC):
 
 ```blade
 <?php
 
-use function Livewire\Volt\{state, rules};
+use Livewire\Component;
 
-state(['items' => fn() => Item::all()]);
+new class extends Component {
 
-rules(['form.name' => 'required|string|max:255']);
+    public string $name = '';
 
-$save = function() {
-    // Save logic
-};
+    public function save(): void
+    {
+        // Save logic
+    }
 
+}
 ?>
 
 <div>
     <!-- Template -->
 </div>
+```
+
+### Routing
+
+Routes use Livewire 4's `Route::livewire()` macro for full-page SFC rendering:
+
+```php
+Route::livewire('/', 'mightyweb::index')->name('dashboard');
+```
+
+Components are registered via `Livewire::addNamespace()` in the service provider:
+
+```php
+Livewire::addNamespace(
+    namespace: 'mightyweb',
+    viewPath: __DIR__.'/../resources/views',
+);
+```
+
+Components are then invoked using the `mightyweb::` namespace:
+
+```blade
+<livewire:mightyweb::app-configuration />
+<livewire:mightyweb::theme.configuration />
 ```
 
 ### File Structure
@@ -382,19 +406,20 @@ $save = function() {
 shynne109/laravel-mightyweb/
 ├── src/
 │   ├── Models/              # 9 Eloquent models
-│   ├── Http/Controllers/    # 3 controllers
+│   ├── Http/Controllers/    # Controllers
 │   ├── Services/            # 2 services
 │   └── MightyWebServiceProvider.php
 ├── resources/
 │   ├── views/
-│   │   ├── livewire/        # 8 Volt components
-│   │   └── components/      # 7 shared components
+│   │   ├── layouts/         # Layout partials
+│   │   ├── *.blade.php      # SFC components
+│   │   └── **/index.blade.php  # Nested SFC components
 │   ├── css/                 # Tailwind CSS
 │   └── js/                  # Alpine.js scripts
 ├── database/
 │   └── migrations/          # Database tables
 ├── routes/
-│   ├── web.php             # Web routes
+│   ├── web.php             # Web routes (Route::livewire)
 │   └── api.php             # API routes
 └── public/
     └── vendor/mightyweb/build/  # Built assets
@@ -402,26 +427,15 @@ shynne109/laravel-mightyweb/
 
 ---
 
-## 🎯 Key Concepts
+## Key Concepts
 
 ### Modal-Based CRUD
 
 All create, edit, and delete operations happen in modals:
-- ✅ No page reloads
-- ✅ Faster user experience  
-- ✅ Better focus and context
-- ✅ Loading states built-in
-
-### Shared Components
-
-7 reusable Blade components for consistency:
-- `<x-modal>` - Full-featured modals
-- `<x-confirmation-modal>` - Delete confirmations
-- `<x-form.input>` - Text inputs
-- `<x-form.textarea>` - Text areas
-- `<x-form.select>` - Dropdowns
-- `<x-form.file-upload>` - File uploads
-- `<x-button>` - Styled buttons
+- No page reloads
+- Faster user experience
+- Better focus and context
+- Loading states built-in
 
 ### Dark Mode
 
@@ -433,27 +447,7 @@ Full dark mode support:
 
 ---
 
-## 📊 Performance
-
-### Asset Sizes
-
-| Asset | Size | Gzipped |
-|-------|------|---------|
-| CSS | 82.05 KB | 12.37 KB |
-| JS | 47.65 KB | 17.13 KB |
-| **Total** | **129.7 KB** | **29.5 KB** |
-
-### Optimizations
-
-- ✅ Vite bundles with tree-shaking
-- ✅ CSS purged of unused styles
-- ✅ Automatic code splitting
-- ✅ Cache busting with hashed filenames
-- ✅ Gzip compression support
-
----
-
-## 🧪 Testing
+## Testing
 
 Run package tests:
 
@@ -463,7 +457,7 @@ composer test
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Assets Not Loading
 
@@ -496,15 +490,11 @@ export default {
 
 **Problem:** Livewire components not interactive
 
-**Solution:** Ensure Livewire is properly installed and `@livewireScripts` is in your layout.
+**Solution:** Ensure Livewire 4 is properly installed and `@livewireScripts` is in your layout.
 
----
+### Component Not Found
 
-## � Troubleshooting
-
-### Dashboard Component Not Found
-
-If you get the error: `Unable to find component: [mightyweb.dashboard]`
+If you get the error: `Unable to find component: [mightyweb::index]`
 
 **Solution:**
 
@@ -513,7 +503,6 @@ If you get the error: `Unable to find component: [mightyweb.dashboard]`
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
-php artisan livewire:discover
 ```
 
 2. Make sure the package service provider is registered (auto-discovery should handle this in Laravel 11+):
@@ -521,14 +510,14 @@ php artisan livewire:discover
 composer dump-autoload
 ```
 
-3. Verify Livewire 3.5+ is installed:
+3. Verify Livewire 4.0+ is installed:
 ```bash
 composer show livewire/livewire
 ```
 
 4. Ensure the MightyWeb service provider is loaded:
 
-**Laravel 12+ Auto-Discovery (Default)**
+**Laravel 11+ Auto-Discovery (Default)**
 
 The package service provider is automatically registered via `composer.json`:
 
@@ -565,8 +554,6 @@ composer dump-autoload
 ```bash
 php artisan vendor:publish --tag=mightyweb-views
 ```
-
-**Note:** The dashboard component is registered as a standard Livewire component (`MightyWeb\Http\Livewire\Dashboard`), not a Volt component, so it works seamlessly in any Laravel application.
 
 ### Assets Not Loading
 
@@ -616,7 +603,7 @@ composer show intervention/image
 
 ---
 
-## �📚 Documentation
+## Documentation
 
 Additional documentation files:
 
@@ -626,7 +613,7 @@ Additional documentation files:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -646,20 +633,20 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
+## License
 
 MightyWeb is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
-## 👨‍💻 Author
+## Author
 
-**Adedoyin Shina**  
+**Adedoyin Shina**
 Email: sbatch2016@gmail.com
 
 ---
 
-## 🙏 Credits
+## Credits
 
 Built with:
 - [Laravel](https://laravel.com)
@@ -670,10 +657,10 @@ Built with:
 
 ---
 
-## ⭐ Support
+## Support
 
 If you find this package helpful, please consider giving it a star on GitHub!
 
 ---
 
-<p align="center">Made with ❤️ for the Laravel community</p>
+<p align="center">Made with care for the Laravel community</p>

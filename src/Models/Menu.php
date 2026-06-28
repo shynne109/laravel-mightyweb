@@ -3,8 +3,8 @@
 namespace MightyWeb\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Menu extends Model
@@ -44,8 +44,6 @@ class Menu extends Model
 
     /**
      * Get the database connection for the model.
-     *
-     * @return string|null
      */
     public function getConnectionName(): ?string
     {
@@ -94,25 +92,21 @@ class Menu extends Model
 
     /**
      * Get the full URL for the menu image.
-     *
-     * @return string|null
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return null;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
 
-        return Storage::disk($disk)->url($path . '/menu/' . $this->image);
+        return Storage::disk($disk)->url($path.'/menu/'.$this->image);
     }
 
     /**
      * Check if the menu has children.
-     *
-     * @return bool
      */
     public function hasChildren(): bool
     {
@@ -121,20 +115,18 @@ class Menu extends Model
 
     /**
      * Delete the menu image from storage.
-     *
-     * @return bool
      */
     public function deleteImage(): bool
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return false;
         }
 
         $disk = config('mightyweb.storage.disk', 'public');
         $path = config('mightyweb.storage.path', 'mightyweb');
-        $fullPath = $path . '/menu/' . $this->image;
+        $fullPath = $path.'/menu/'.$this->image;
 
-        return Storage::disk($disk)->exists($fullPath) 
+        return Storage::disk($disk)->exists($fullPath)
             ? Storage::disk($disk)->delete($fullPath)
             : false;
     }
@@ -146,8 +138,8 @@ class Menu extends Model
     {
         static::deleting(function (Menu $menu) {
             // Delete children
-            $menu->children()->each(fn($child) => $child->delete());
-            
+            $menu->children()->each(fn ($child) => $child->delete());
+
             // Delete image
             $menu->deleteImage();
         });
